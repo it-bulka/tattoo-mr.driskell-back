@@ -20,6 +20,7 @@ const errorMiddleware = require('./app/middleware/error-handler')
 const notFoundMiddleware = require('./app/middleware/not-found')
 
 // ROUTES
+const userRouter = require('./app/routes/user.js')
 const tattooMachineRouter = require('./app/routes/tattoo-machines.js')
 
 const rateLimiter = rateLimit({
@@ -44,7 +45,8 @@ app.get('/', (req, res) => {
   res.send('SUCCESS')
 })
 
-router.use("/tattoo-machines", tattooMachineRouter);
+router.use("/users", userRouter)
+router.use("/tattoo-machines", tattooMachineRouter)
 app.use("/api/v1", router)
 
 app.use(notFoundMiddleware)
