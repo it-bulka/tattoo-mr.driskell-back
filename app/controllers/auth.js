@@ -16,7 +16,7 @@ const register = async (req, res) => {
     password
   })
 
-  res.status(StatusCode.OK).json({ user, success: true })
+  res.status(StatusCode.OK).json({ data: user, success: true })
 }
 
 module.exports = {

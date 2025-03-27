@@ -4,7 +4,7 @@ const { NotFound, BadRequest } = require("../errors")
 
 const getAllUsers = async (req, res) => {
   const users = await User.find().selectWithoutPassword()
-  res.status(StatusCodes.OK).json({ users, success: "success" })
+  res.status(StatusCodes.OK).json({ data: users, success: "success" })
 }
 
 const getSingleUser = async (req, res) => {
@@ -15,7 +15,7 @@ const getSingleUser = async (req, res) => {
   }
 
   // TODO: add check permission
-  res.status(StatusCodes.OK).json({ user, success: "success" })
+  res.status(StatusCodes.OK).json({ data: user, success: "success" })
 }
 
 const getCurrentUser = async (req, res) => {
@@ -25,7 +25,7 @@ const getCurrentUser = async (req, res) => {
     throw new NotFound('User not found')
   }
 
-  res.status(StatusCodes.OK).json({ user, success: "success" })
+  res.status(StatusCodes.OK).json({ data: user, success: "success" })
 }
 
 const updateUser = async (req, res) => {
@@ -49,7 +49,7 @@ const updateUser = async (req, res) => {
     throw new NotFound('User not found')
   }
 
-  res.status(StatusCodes.OK).json({ user, success: "success" })
+  res.status(StatusCodes.OK).json({ data: user, success: "success" })
 }
 
 const updateUserPassword = async (req, res) => {
