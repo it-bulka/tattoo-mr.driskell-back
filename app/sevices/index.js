@@ -1,5 +1,9 @@
-const { getTattooMachine } = require("./tattoo-machine.js")
+const tattooMachine = require("./tattoo-machine.js")
+const order = require("./order")
+const services = require("./services")
 
 module.exports = {
-  getTattooMachine
+  ...tattooMachine,
+  ...order,
+  ...services
 }
