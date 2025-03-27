@@ -1,4 +1,4 @@
-const { TattooMachine } =  require("../models")
+const { TattooMachine, TattooMachineTranslation } =  require("../models")
 const mongoose = require('mongoose')
 const { getTattooMachineAggregationPipeline } = require('../utils/getTattooMachineAggregationPipeline')
 
@@ -55,7 +55,12 @@ const getTattooMachines = async (params, lang) => {
   }
 }
 
+const deleteTranslationsByTattooMachine = async (tattooMachineId) => {
+  await TattooMachineTranslation.deleteMany({ tattooMachineId })
+}
+
 module.exports = {
   getTattooMachineById,
-  getTattooMachines
+  getTattooMachines,
+  deleteTranslationsByTattooMachine
 }
