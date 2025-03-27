@@ -1,0 +1,13 @@
+[
+  {
+    "_id": "644f537b0e70f1f96f4a12d5",
+    "code": "DISCOUNT2025",
+    "discountType": "percentage",
+    "discountValue": 15,
+    "expiresAt": "2025-12-31T23:59:59.000Z",
+    "usageLimit": 100,
+    "usedCount": 0,
+    "minOrderValue": 500,
+    "isActive": true
+  }
+]

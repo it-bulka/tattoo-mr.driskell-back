@@ -1,0 +1,46 @@
+[
+  {
+    "_id": "64f207ff80e4d2243a0b10b1",
+    "images": [
+      "https://example.com/images/tattoo_machine_1.jpg",
+      "https://example.com/images/tattoo_machine_2.jpg"
+    ],
+    "tags": ["new", "hit"],
+    "translations": [
+      {
+        "_id": "64f207ff80e4d2243a0b10b2",
+        "lang": "en",
+        "price": 1500,
+        "tattooMachineId": "64f207ff80e4d2243a0b10b1"
+      },
+      {
+        "_id": "64f207ff80e4d2243a0b10b3",
+        "lang": "uk",
+        "price": 1500,
+        "tattooMachineId": "64f207ff80e4d2243a0b10b1"
+      }
+    ]
+  },
+  {
+    "_id": "64f208fe90e4d2243a0b10b4",
+    "images": [
+      "https://example.com/images/tattoo_machine_3.jpg",
+      "https://example.com/images/tattoo_machine_4.jpg"
+    ],
+    "tags": ["promotion", "discount"],
+    "translations": [
+      {
+        "_id": "64f208fe90e4d2243a0b10b5",
+        "lang": "en",
+        "price": 1200,
+        "tattooMachineId": "64f208fe90e4d2243a0b10b4"
+      },
+      {
+        "_id": "64f208fe90e4d2243a0b10b6",
+        "lang": "uk",
+        "price": 1200,
+        "tattooMachineId": "64f208fe90e4d2243a0b10b4"
+      }
+    ]
+  }
+]

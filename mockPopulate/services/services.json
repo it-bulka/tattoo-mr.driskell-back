@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "64ef539b6c92a99b15f7d21a",
+    "name": {
+      "en": "Express shipping",
+      "uk": "Термінова відправка"
+    },
+    "description": {
+      "en": "Same-day shipping",
+      "uk": "Відправка в той же день"
+    },
+    "type": "fixed",
+    "value": 250,
+    "currency": "UAN",
+    "status": "active"
+  },
+  {
+    "_id": "64ef539b6c92a99b15f7d21b",
+    "name": {
+      "en": "Postal insurance",
+      "uk": "Поштова гарантія"
+    },
+    "description": {
+      "en": "Compensation for lost parcel",
+      "uk": "Компенсація втрати посилки"
+    },
+    "type": "percentage",
+    "value": 4,
+    "currency": "UAN",
+    "status": "active"
+  },
+  {
+    "_id": "64ef539b6c92a99b15f7d22b",
+    "name": {
+      "en": "Extended warranty",
+      "uk": "Розширена гарантія"
+    },
+    "description": {
+      "en": "Additional 1-year warranty",
+      "uk": "Додаткова гарантія 1 рік"
+    },
+    "type": "percentage",
+    "value": 10,
+    "currency": "UAN",
+    "status": "active"
+  },
+  {
+    "_id": "64ef539b6c92a99b15f7d23b",
+    "name": {
+      "en": "Gift wrapping",
+      "uk": "Подарункове оформлення"
+    },
+    "description": {
+      "en": "Beautiful packaging and a greeting card",
+      "uk": "Красива упаковка та листівка"
+    },
+    "type": "fixed",
+    "value": 500,
+    "currency": "UAN",
+    "status": "active"
+  }
+]

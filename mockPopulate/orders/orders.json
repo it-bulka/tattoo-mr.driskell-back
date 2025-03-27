@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "64f5a0331c0b8e42fdb607e4",
+    "userId": "67e423a7338425de0b07ed80",
+    "orderDate": "2025-03-26T10:00:00.000Z",
+    "items": [
+      {
+        "tattooMachineId": "64f207ff80e4d2243a0b10b1",
+        "quantity": 1,
+        "nameAtPurchase": "Tattoo Machine 1",
+        "priceAtPurchase": 1500,
+        "imageAtPurchase": 1
+      },
+      {
+        "tattooMachineId": "64f208fe90e4d2243a0b10b4",
+        "quantity": 2,
+        "nameAtPurchase": "Tattoo Machine 2",
+        "priceAtPurchase": 1200,
+        "imageAtPurchase": 3
+      }
+    ],
+    "totalPrice": 4800,
+    "totalDiscounts": 300,
+    "totalProductsPrice": 5100,
+    "totalServicePrice": 200,
+    "promoCode": "644f537b0e70f1f96f4a12d5",
+    "shippingAddress": {
+      "street": "123 Main St",
+      "city": "Kyiv",
+      "postalCode": "01001",
+      "country": "Ukraine"
+    },
+    "status": "pending",
+    "paymentMethod": "credit card",
+    "deliveryMethod": "courier"
+  }
+
+]
