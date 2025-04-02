@@ -1,3 +1,9 @@
+const getTagsPipeline = (tagsQuery) => {
+  const tagsArray = Array.isArray(tagsQuery) ? tagsQuery : tagsQuery.split(',')
+  console.log('tagsArray', tagsArray)
+  return [{ $match: { tags: { $in: tagsArray } } }]
+}
+
 const getTattooMachineAggregationPipeline = (lang) => [
   {
     $lookup: {
@@ -25,10 +31,12 @@ const getTattooMachineAggregationPipeline = (lang) => [
       images: 1,
       price: '$translation.price',
       lang: '$translation.lang',
+      tags: '$tags',
     }
   }
 ]
 
 module.exports = {
-  getTattooMachineAggregationPipeline
+  getTattooMachineAggregationPipeline,
+  getTagsPipeline
 }

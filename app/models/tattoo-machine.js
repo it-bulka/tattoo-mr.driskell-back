@@ -113,5 +113,6 @@ const TattooMachine = mongoose.model('TattooMachine', tattooMachineSchema, 'tatt
 
 module.exports = {
   TattooMachineTranslation,
-  TattooMachine
+  TattooMachine,
+  tags
 }

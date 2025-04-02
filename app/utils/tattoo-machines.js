@@ -1,14 +1,30 @@
 const { TattooMachine } = require('../models')
-const { getTattooMachineAggregationPipeline } = require('./getTattooMachineAggregationPipeline')
+const { getTattooMachineAggregationPipeline, getTagsPipeline } = require('./getTattooMachineAggregationPipeline')
 const { setUrl } = require('./setUrl')
 
-const getTattooMachinesWithPagination = async (page, pageSize, lang) => {
-  return TattooMachine.aggregate([
+const getTattooMachinesWithPagination = async ({ page, pageSize, lang, tags }) => {
+  const result = await TattooMachine.aggregate([
     { $sort: { createdAt: -1 } },
     ...getTattooMachineAggregationPipeline(lang),
-    { $skip: (page - 1) * pageSize },
-    { $limit: pageSize }
+    ...(tags ? getTagsPipeline(tags) : []),
+    { $facet: {
+        data: [
+          { $skip: (page - 1) * pageSize },
+          { $limit: pageSize }
+        ],
+        totalCount: [
+          { $count: "count" }
+        ]
+      }}
   ])
+
+  const machines = result[0].data
+  const totalCount = result[0].totalCount[0]?.count || 0
+
+  return {
+    machines,
+    totalCount
+  }
 }
 
 const setImageUrls = (machines) => {

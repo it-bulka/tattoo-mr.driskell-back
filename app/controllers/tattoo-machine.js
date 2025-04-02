@@ -1,6 +1,11 @@
 const { getTattooMachineById, getTattooMachines } = require("../sevices/tattoo-machine")
 const { BadRequest } = require("../errors")
 const { StatusCodes } = require('http-status-codes')
+const {
+  tagsValidator,
+  pageValidator,
+  limitValidator
+} = require("../validators")
 
 const getSingleTattooMachine = async (req, res) => {
   const tattooMachineId = req.params.id
@@ -16,7 +21,44 @@ const getSingleTattooMachine = async (req, res) => {
 }
 
 const getAllTattooMachines = async (req, res) => {
-  const machines = await getTattooMachines({}, req.lang)
+  const filters = req.query
+  const params = {}
+  const errors = []
+
+  if(filters.tags) {
+    const err = tagsValidator(filters.tags)
+    if(err) {
+      errors.push(err)
+    }
+
+    params.tags = filters.tags
+  }
+
+  if(filters.page) {
+    let page = parseInt(filters.page)
+    const err = pageValidator(page)
+    if(err) {
+      errors.push(err)
+    }
+
+    params.page = page
+  }
+
+  if(filters.limit) {
+    let limit = parseInt(filters.limit)
+    const err = limitValidator(limit)
+    if(err) {
+      errors.push(err)
+    }
+
+    params.limit = limit
+  }
+
+  if(errors.length) {
+    throw new BadRequest(errors.join('\n'))
+  }
+
+  const machines = await getTattooMachines(params, req.lang)
 
   if (!machines) {
     throw new BadRequest(`Tattoo machines not found`)

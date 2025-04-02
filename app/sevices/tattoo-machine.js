@@ -42,11 +42,10 @@ const getTattooMachineById = async (id, lang) => {
  * @returns {Promise<PaginatedTattooMachines>} - A promise that resolves to an object containing pagination data for tattoo machines.
  */
 const getTattooMachines = async (params, lang) => {
-  const { page = 1, pageSize = 10 } = params
+  const { page = 1, pageSize = 10, ...rest } = params
 
-  const machines = await getTattooMachinesWithPagination(page, pageSize, lang);
+  const { machines, totalCount } = await getTattooMachinesWithPagination({ page, pageSize, lang, ...rest });
   const machinesWithImgUrl = setImageUrls(machines);
-  const totalCount = await getTotalCount()
 
   return {
     machines: machinesWithImgUrl,
