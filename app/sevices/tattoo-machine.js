@@ -1,7 +1,11 @@
 const { TattooMachine, TattooMachineTranslation } =  require("../models")
 const mongoose = require('mongoose')
 const { getTattooMachineAggregationPipeline } = require('../utils/getTattooMachineAggregationPipeline')
-const { setUrl } = require('../utils/setUrl')
+const {
+  getTattooMachinesWithPagination,
+  setImageUrls,
+  getTotalCount
+} = require('../utils/tattoo-machines')
 
 /** @typedef {import('../types').ObjectId} ObjectId */
 /** @typedef {import('../types').Language} Language */
@@ -39,20 +43,10 @@ const getTattooMachineById = async (id, lang) => {
  */
 const getTattooMachines = async (params, lang) => {
   const { page = 1, pageSize = 10 } = params
-  const machines  = await TattooMachine.aggregate([
-    { $sort: { createdAt: -1 } },
-    ...getTattooMachineAggregationPipeline(lang),
-    { $skip: (page - 1) * pageSize },
-    { $limit: pageSize }
-  ])
 
-  const machinesWithImgUrl = machines.map(machine => {
-    return {
-      ...machine,
-      images: [...machine.images.map(img => setUrl(img))]
-    }
-  })
-  const totalCount = await TattooMachine.countDocuments();
+  const machines = await getTattooMachinesWithPagination(page, pageSize, lang);
+  const machinesWithImgUrl = setImageUrls(machines);
+  const totalCount = await getTotalCount()
 
   return {
     machines: machinesWithImgUrl,

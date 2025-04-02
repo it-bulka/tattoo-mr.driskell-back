@@ -23,6 +23,7 @@ const notFoundMiddleware = require('./app/middleware/not-found')
 const userRouter = require('./app/routes/user.js')
 const tattooMachineRouter = require('./app/routes/tattoo-machines.js')
 const orderRouter = require('./app/routes/order.js')
+const favouritesRouter = require('./app/routes/favourite')
 
 const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -49,6 +50,7 @@ app.get('/', (req, res) => {
 router.use("/users", userRouter)
 router.use("/tattoo-machines", tattooMachineRouter)
 router.use("/orders", orderRouter)
+router.use("/favourites", favouritesRouter)
 app.use("/api/v1", router)
 
 app.use(notFoundMiddleware)

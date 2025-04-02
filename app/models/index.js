@@ -2,10 +2,12 @@ const { TattooMachine, TattooMachineTranslation } = require("./tattoo-machine")
 const { PromoCode } = require("./promo-codes")
 const order = require("./order")
 const service = require("./services")
+const favourite = require("./favourite-machine")
 
 module.exports = {
   TattooMachine, TattooMachineTranslation,
   PromoCode,
   ...order,
-  ...service
+  ...service,
+  ...favourite
 }
