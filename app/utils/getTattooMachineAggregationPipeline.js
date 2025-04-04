@@ -1,7 +1,11 @@
 const getTagsPipeline = (tagsQuery) => {
   const tagsArray = Array.isArray(tagsQuery) ? tagsQuery : tagsQuery.split(',')
-  console.log('tagsArray', tagsArray)
   return [{ $match: { tags: { $in: tagsArray } } }]
+}
+
+const getCategoriesPipeline = (categoriesQuery) => {
+  const categoriesArray = Array.isArray(categoriesQuery) ? categoriesQuery : categoriesQuery.split(',')
+  return [{ $match: { categories: { $in: categoriesArray } } }]
 }
 
 const getTattooMachineAggregationPipeline = (lang) => [
@@ -32,11 +36,12 @@ const getTattooMachineAggregationPipeline = (lang) => [
       price: '$translation.price',
       lang: '$translation.lang',
       tags: '$tags',
+      categories: '$categories',
     }
   }
 ]
 
 module.exports = {
   getTattooMachineAggregationPipeline,
-  getTagsPipeline
+  getTagsPipeline,getCategoriesPipeline
 }

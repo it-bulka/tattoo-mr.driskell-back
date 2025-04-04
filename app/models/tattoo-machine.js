@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const { langs } = require('../utils')
+const duplicateValidator = require('../validators/duplicateValidator')
 const tags = ['new', 'hit', 'promotion', 'absent', 'discount']
+const categories = ['bestseller', 'popular', 'new', 'sale']
 const { BadRequest } = require('../errors')
 
 const tattooMachineTranslationSchema = new mongoose.Schema({
@@ -8,6 +10,10 @@ const tattooMachineTranslationSchema = new mongoose.Schema({
     type: String,
     enum: langs,
     required: [true, `Provide one of following: ${langs.join(' ,')}`]
+  },
+  title: {
+    type: String,
+    required: [true, 'Provide title for tattoo machine'],
   },
   price: {
     type: Number,
@@ -30,12 +36,12 @@ const tattooMachineSchema = new mongoose.Schema({
   tags: {
     type: [String],
     enum: tags,
-    validate: {
-      validator: function (value) {
-        return value.length === new Set(value).size
-      },
-      message: props => `${props.value} contains duplicate values!`
-    }
+    validate: duplicateValidator
+  },
+  categories: {
+    type: [String],
+    enum: categories,
+    validate: duplicateValidator
   },
 })
 
@@ -72,6 +78,7 @@ tattooMachineSchema.post('save', async function () {
         const newTranslation = new TattooMachineTranslation({
           lang: translation.lang,
           price: translation.price,
+          title: translation.title,
           tattooMachineId: translation.tattooMachineId,
         })
 
@@ -114,5 +121,6 @@ const TattooMachine = mongoose.model('TattooMachine', tattooMachineSchema, 'tatt
 module.exports = {
   TattooMachineTranslation,
   TattooMachine,
-  tags
+  tags,
+  categories
 }

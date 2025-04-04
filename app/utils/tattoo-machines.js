@@ -1,12 +1,15 @@
 const { TattooMachine } = require('../models')
-const { getTattooMachineAggregationPipeline, getTagsPipeline } = require('./getTattooMachineAggregationPipeline')
+const {
+  getTattooMachineAggregationPipeline, getTagsPipeline,getCategoriesPipeline
+} = require('./getTattooMachineAggregationPipeline')
 const { setUrl } = require('./setUrl')
 
-const getTattooMachinesWithPagination = async ({ page, pageSize, lang, tags }) => {
+const getTattooMachinesWithPagination = async ({ page, pageSize, lang, tags, category }) => {
   const result = await TattooMachine.aggregate([
     { $sort: { createdAt: -1 } },
     ...getTattooMachineAggregationPipeline(lang),
     ...(tags ? getTagsPipeline(tags) : []),
+    ...(category ? getCategoriesPipeline(category) : []),
     { $facet: {
         data: [
           { $skip: (page - 1) * pageSize },

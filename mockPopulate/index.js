@@ -4,7 +4,7 @@ const express = require('express')
 const app = express()
 
 const connectDB = require('../app/db/connectDB')
-const { populateOrder } = require('./orders/orders-populate')
+const { populateTattooMachine } = require('./tattoo-machines/tattoo-machines-populate')
 
 const PORT = 3001
 
@@ -13,7 +13,7 @@ const start = async () => {
     await connectDB()
     app.listen(PORT)
 
-    await populateOrder()
+    await populateTattooMachine()
 
     process.exit(0)
   } catch (error) {

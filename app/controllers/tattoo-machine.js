@@ -4,7 +4,8 @@ const { StatusCodes } = require('http-status-codes')
 const {
   tagsValidator,
   pageValidator,
-  limitValidator
+  limitValidator,
+  categoriesValidator
 } = require("../validators")
 
 const getSingleTattooMachine = async (req, res) => {
@@ -32,6 +33,15 @@ const getAllTattooMachines = async (req, res) => {
     }
 
     params.tags = filters.tags
+  }
+
+  if(filters.category) {
+    const err = categoriesValidator(filters.category)
+    if(err) {
+      errors.push(err)
+    }
+
+    params.category = filters.category
   }
 
   if(filters.page) {
