@@ -61,7 +61,7 @@ const getAllTattooMachines = async (req, res) => {
       errors.push(err)
     }
 
-    params.limit = limit
+    params.pageSize = limit
   }
 
   if(errors.length) {

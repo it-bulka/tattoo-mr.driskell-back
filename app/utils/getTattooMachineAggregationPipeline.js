@@ -35,6 +35,7 @@ const getTattooMachineAggregationPipeline = (lang) => [
       images: 1,
       price: '$translation.price',
       lang: '$translation.lang',
+      title: '$translation.title',
       tags: '$tags',
       categories: '$categories',
     }
