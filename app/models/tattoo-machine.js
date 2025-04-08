@@ -3,10 +3,10 @@ const { langs } = require('../utils')
 const duplicateValidator = require('../validators/duplicateValidator')
 const tags = ['new', 'hit', 'promotion', 'absent', 'discount']
 const categories = [
-  'bestseller', 'popular', 'new', 'sale',
   'tattoo-sets', 'tattoo-machines', 'tattoo-inks', 'tattoo-needles', 'tattoo-holders',
   'tattoo-tips', 'power-supplies', 'pedals-and-wires', 'accessories', 'printers-and-tablets', 'protection-containers-consumables'
 ]
+const labels = [ 'bestseller', 'popular', 'new', 'sale' ]
 const { BadRequest } = require('../errors')
 
 const tattooMachineTranslationSchema = new mongoose.Schema({
@@ -23,11 +23,34 @@ const tattooMachineTranslationSchema = new mongoose.Schema({
     type: Number,
     required: [true, `Provide price in Ukrainian currency`]
   },
+  priceCurrent: {
+    type: Number,
+    default: null,
+  },
+  currency: {
+    type: String,
+    default: 'UAH'
+  },
   tattooMachineId: {
     type: mongoose.Types.ObjectId,
     ref: 'TattooMachines',
     required: true
   },
+  // for details
+  shortDescription: {
+    type: String,
+    required: true,
+    maxlength: 200,
+  },
+  longDescription: {
+    type: [String],
+    required: true
+  },
+  stock: { type: Number, default: 0 },
+  specs: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  }
 })
 
 tattooMachineTranslationSchema.index({ lang: 1, tattooMachineId: 1 }, { unique: true })
@@ -42,10 +65,15 @@ const tattooMachineSchema = new mongoose.Schema({
     enum: tags,
     validate: duplicateValidator
   },
-  categories: {
+  category: {
+    type: String,
+    enum: categories
+  },
+  labels: {
     type: [String],
-    enum: categories,
-    validate: duplicateValidator
+    enum: labels,
+    validate: duplicateValidator,
+    default: []
   },
 })
 
@@ -82,8 +110,12 @@ tattooMachineSchema.post('save', async function () {
         const newTranslation = new TattooMachineTranslation({
           lang: translation.lang,
           price: translation.price,
+          priceCurrent: translation.priceCurrent,
           title: translation.title,
           tattooMachineId: translation.tattooMachineId,
+          shortDescription: translation.shortDescription,
+          longDescription: translation.longDescription,
+          specs: translation.specs,
         })
 
         await newTranslation.save({ session })
@@ -126,5 +158,6 @@ module.exports = {
   TattooMachineTranslation,
   TattooMachine,
   tags,
-  categories
+  categories,
+  labels
 }

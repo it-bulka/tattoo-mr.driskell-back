@@ -5,7 +5,13 @@ const getTagsPipeline = (tagsQuery) => {
 
 const getCategoriesPipeline = (categoriesQuery) => {
   const categoriesArray = Array.isArray(categoriesQuery) ? categoriesQuery : categoriesQuery.split(',')
-  return [{ $match: { categories: { $in: categoriesArray } } }]
+  return [{ $match: { category: { $in: categoriesArray } } }]
+}
+
+const getLabelsPipeline = (labelsQuery) => {
+  console.log('labelsQuery', labelsQuery)
+  const labelsArray = Array.isArray(labelsQuery) ? labelsQuery : labelsQuery.split(',')
+  return [{ $match: { labels: { $in: labelsArray } } }]
 }
 
 const getTattooMachineAggregationPipeline = (lang) => [
@@ -34,15 +40,35 @@ const getTattooMachineAggregationPipeline = (lang) => [
       _id: 0,
       images: 1,
       price: '$translation.price',
+      priceCurrent: '$translation.priceCurrent',
       lang: '$translation.lang',
       title: '$translation.title',
+      specs: '$translation.specs',
+      longDescription: '$translation.longDescription',
+      shortDescription: '$translation.shortDescription',
+      stock: 1,
       tags: '$tags',
-      categories: '$categories',
+      category: 1,
+      labels: 1,
     }
   }
 ]
 
+const excludeDetails = () => ([
+  { $project: {
+      specs: 0,
+      labels: 0,
+      categories: 0,
+      longDescription: 0,
+      shortDescription: 0,
+    }
+  }
+])
+
 module.exports = {
   getTattooMachineAggregationPipeline,
-  getTagsPipeline,getCategoriesPipeline
+  getTagsPipeline,
+  getCategoriesPipeline,
+  getLabelsPipeline,
+  excludeDetails
 }

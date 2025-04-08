@@ -5,8 +5,10 @@ const {
   tagsValidator,
   pageValidator,
   limitValidator,
-  categoriesValidator
+  categoriesValidator,
+  labelsValidator
 } = require("../validators")
+const { setImageUrls } = require('../utils/tattoo-machines')
 
 const getSingleTattooMachine = async (req, res) => {
   const tattooMachineId = req.params.id
@@ -18,7 +20,9 @@ const getSingleTattooMachine = async (req, res) => {
     throw new BadRequest(`Tattoo machine with id ${tattooMachineId} not found`)
   }
 
-  res.status(StatusCodes.OK).json(machine)
+  const machineWithImgUrl = setImageUrls(machine)
+
+  res.status(StatusCodes.OK).json(machineWithImgUrl)
 }
 
 const getAllTattooMachines = async (req, res) => {
@@ -42,6 +46,15 @@ const getAllTattooMachines = async (req, res) => {
     }
 
     params.category = filters.category
+  }
+
+  if(filters.label) {
+    const err = labelsValidator(filters.label)
+    if(err) {
+      errors.push(err)
+    }
+
+    params.label = filters.label
   }
 
   if(filters.page) {
@@ -77,7 +90,9 @@ const getAllTattooMachines = async (req, res) => {
   res.status(StatusCodes.OK).json(machines)
 }
 
+const getSetForSingleTattooMachine = async (req, res) => {
 
+}
 
 module.exports = {
   getSingleTattooMachine,

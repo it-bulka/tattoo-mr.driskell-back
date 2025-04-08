@@ -1,9 +1,11 @@
-const { TattooMachine, TattooMachineTranslation } =  require("../models")
+const {
+  TattooMachine, TattooMachineTranslation
+} =  require("../models")
 const mongoose = require('mongoose')
 const { getTattooMachineAggregationPipeline } = require('../utils/getTattooMachineAggregationPipeline')
 const {
   getTattooMachinesWithPagination,
-  setImageUrls,
+  setMultipleImageUrls,
   getTotalCount
 } = require('../utils/tattoo-machines')
 
@@ -23,6 +25,7 @@ const getTattooMachineById = async (id, lang) => {
     ...getTattooMachineAggregationPipeline(lang),
     { $limit: 1 }
   ])
+  console.log('machines', machines)
   return machines[0] || null
 }
 
@@ -45,7 +48,7 @@ const getTattooMachines = async (params, lang) => {
   const { page = 1, pageSize = 10, ...rest } = params
 
   const { machines, totalCount } = await getTattooMachinesWithPagination({ page, pageSize, lang, ...rest });
-  const machinesWithImgUrl = setImageUrls(machines);
+  const machinesWithImgUrl = setMultipleImageUrls(machines);
 
   return {
     machines: machinesWithImgUrl,
@@ -57,6 +60,15 @@ const getTattooMachines = async (params, lang) => {
 
 const deleteTranslationsByTattooMachine = async (tattooMachineId) => {
   await TattooMachineTranslation.deleteMany({ tattooMachineId })
+}
+
+const getSetForSingleTattooMachine = async (req, res) => {
+  const compatibleSets = {
+    'tattoo-machines': ['tattoo-needles', 'tattoo-inks', 'power-supplies'],
+    'tattoo-sets': ['tattoo-inks', 'tattoo-needles', 'accessories'],
+    'tattoo-inks': ['tattoo-machines', 'tattoo-needles', 'accessories'],
+    // ...
+  }
 }
 
 module.exports = {

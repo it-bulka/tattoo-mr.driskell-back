@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const { FavouriteMachine, TattooMachine } = require('../models')
-const { setImageUrls, getTotalCount } = require("../utils/tattoo-machines")
+const { setMultipleImageUrls, getTotalCount } = require("../utils/tattoo-machines")
 const { getTattooMachineAggregationPipeline } = require("../utils/getTattooMachineAggregationPipeline")
 
 const getIdsAllFavouriteTattooMachines = async (req, res) => {
@@ -23,7 +23,7 @@ const getAllFavouriteTattooMachinesByUser = async ({ userId, page, pageSize, lan
     { $limit: pageSize }
   ])
 
-  const machinesWithImgUrl = setImageUrls(likedMachines);
+  const machinesWithImgUrl = setMultipleImageUrls(likedMachines);
   const totalCount = await TattooMachine.countDocuments({ _id: { $in: likedMachineIds } })
 
   return {
