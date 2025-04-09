@@ -19,18 +19,6 @@ const tattooMachineTranslationSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Provide title for tattoo machine'],
   },
-  price: {
-    type: Number,
-    required: [true, `Provide price in Ukrainian currency`]
-  },
-  priceCurrent: {
-    type: Number,
-    default: null,
-  },
-  currency: {
-    type: String,
-    default: 'UAH'
-  },
   tattooMachineId: {
     type: mongoose.Types.ObjectId,
     ref: 'TattooMachines',
@@ -46,7 +34,6 @@ const tattooMachineTranslationSchema = new mongoose.Schema({
     type: [String],
     required: true
   },
-  stock: { type: Number, default: 0 },
   specs: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -75,6 +62,24 @@ const tattooMachineSchema = new mongoose.Schema({
     validate: duplicateValidator,
     default: []
   },
+  brand: {
+    type: mongoose.Types.ObjectId,
+    ref: 'Brand',
+    required: [true, 'Provide the brand of the product'],
+  },
+  price: {
+    type: Number,
+    required: [true, `Provide price in Ukrainian currency`]
+  },
+  priceCurrent: {
+    type: Number,
+    default: null,
+  },
+  currency: {
+    type: String,
+    default: 'UAH'
+  },
+  stock: { type: Number, default: 0 },
 })
 
 tattooMachineSchema.pre('save', function (next) {
@@ -109,8 +114,6 @@ tattooMachineSchema.post('save', async function () {
       for (let translation of this.$locals.translations) {
         const newTranslation = new TattooMachineTranslation({
           lang: translation.lang,
-          price: translation.price,
-          priceCurrent: translation.priceCurrent,
           title: translation.title,
           tattooMachineId: translation.tattooMachineId,
           shortDescription: translation.shortDescription,

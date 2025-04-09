@@ -2,12 +2,17 @@ const {
   TattooMachine, TattooMachineTranslation
 } =  require("../models")
 const mongoose = require('mongoose')
-const { getTattooMachineAggregationPipeline } = require('../utils/getTattooMachineAggregationPipeline')
+const {
+  getTattooMachineAggregationPipeline,
+  getPureFieldsPipeline
+} = require('../utils/getTattooMachineAggregationPipeline')
 const {
   getTattooMachinesWithPagination,
   setMultipleImageUrls,
   getTotalCount
 } = require('../utils/tattoo-machines')
+
+const { compatibleSets, specsPropertyList } = require('../consts/tattoo-machines')
 
 /** @typedef {import('../types').ObjectId} ObjectId */
 /** @typedef {import('../types').Language} Language */
@@ -62,17 +67,128 @@ const deleteTranslationsByTattooMachine = async (tattooMachineId) => {
   await TattooMachineTranslation.deleteMany({ tattooMachineId })
 }
 
-const getSetForSingleTattooMachine = async (req, res) => {
-  const compatibleSets = {
-    'tattoo-machines': ['tattoo-needles', 'tattoo-inks', 'power-supplies'],
-    'tattoo-sets': ['tattoo-inks', 'tattoo-needles', 'accessories'],
-    'tattoo-inks': ['tattoo-machines', 'tattoo-needles', 'accessories'],
-    // ...
-  }
+const getCombo = async ({ productId, category}) => {
+  const otherCategories = compatibleSets[category] || []
+
+  const combo = await Promise.all(
+    otherCategories.map(itemCategory =>
+      TattooMachine.aggregate([
+        { $match: { category: itemCategory, _id: { $ne: productId } } },
+        { $sample: { size: 1 } },
+        getPureFieldsPipeline()
+      ])
+    )
+  )
+
+  return combo.flat()
 }
+
+const getSameBrand = async ({ brand, productId }) => {
+  const brandItems = await TattooMachine.aggregate([
+    { $match: { brand, _id: { $ne: productId } } },
+    { $sample: { size: 4 } },
+    getPureFieldsPipeline()
+  ])
+
+  return brandItems
+}
+
+const getSimilar = async ({ product, lang }) => {
+  const productDetails = await TattooMachineTranslation.findOne({
+    tattooMachineId: product._id,
+    lang: lang
+  }).lean()
+
+  const specsKeys = specsPropertyList[product.category]
+  const orFilters = specsKeys.map(key => ({ [`translation.specs.${key}`]: productDetails.specs[key] }))
+
+  const similarityConditions = specsKeys.map(key => ({
+    $cond: [{ $eq: [`$translation.specs.${key}`, productDetails.specs[key]] }, 1, 0]
+  }))
+
+  const similar = await TattooMachine.aggregate([
+    {
+      $match: {
+        _id: { $ne: product._id },
+        category: product.category,
+      }
+    },
+    {
+      $lookup: {
+        from: "tattoomachinetranslations",
+        let: { productId: "$_id", lang: lang },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$tattooMachineId", "$$productId"] },
+                  { $eq: ["$lang", "$$lang"] }
+                ]
+              }
+            }
+          }
+        ],
+        as: "translation"
+      }
+    },
+    {
+      $unwind: {
+        path: '$translation',
+        preserveNullAndEmptyArrays: false,
+      }
+    },
+    {
+      $match: { $or: orFilters }
+    },
+    {
+      $addFields: {
+        similarity: {
+          $add: similarityConditions
+        }
+      }
+    },
+    {
+      $sort: { similarity: -1 }
+    },
+    {
+      $limit: 4
+    },
+    getPureFieldsPipeline()
+  ])
+
+  return similar
+}
+
+const getRecommendedItems = async ({ product }) => {
+  const machines  = await TattooMachine.aggregate([
+    {
+      $match: {
+        _id: { $ne: product._id },
+        category: product.category,
+        labels: { $in: ['popular'] },
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1
+      }
+    },
+    { $limit: 4 },
+    getPureFieldsPipeline()
+  ])
+
+  return machines || []
+}
+
+
 
 module.exports = {
   getTattooMachineById,
   getTattooMachines,
-  deleteTranslationsByTattooMachine
+  deleteTranslationsByTattooMachine,
+  getCombo,
+  getSameBrand,
+  getSimilar,
+  getRecommendedItems
 }

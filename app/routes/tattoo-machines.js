@@ -1,5 +1,9 @@
 const express = require('express')
-const { getSingleTattooMachine, getAllTattooMachines } = require("../controllers/tattoo-machine.js");
+const {
+  getSingleTattooMachine,
+  getAllTattooMachines,
+  getRelated
+} = require("../controllers/tattoo-machine.js");
 const router = express.Router()
 
 router.route('/')
@@ -7,6 +11,9 @@ router.route('/')
 
 router.route('/:id')
   .get(getSingleTattooMachine)
+
+router.route('/:id/related')
+  .get(getRelated)
 
 
 module.exports = router

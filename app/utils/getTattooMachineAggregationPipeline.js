@@ -39,8 +39,8 @@ const getTattooMachineAggregationPipeline = (lang) => [
       id: '$_id',
       _id: 0,
       images: 1,
-      price: '$translation.price',
-      priceCurrent: '$translation.priceCurrent',
+      price: 1,
+      priceCurrent: 1,
       lang: '$translation.lang',
       title: '$translation.title',
       specs: '$translation.specs',
@@ -65,10 +65,26 @@ const excludeDetails = () => ([
   }
 ])
 
+const getPureFieldsPipeline = () => {
+  return {
+    $project: {
+      id: '$_id',
+      _id: 0,
+      images: 1,
+      title: 1,
+      price: 1,
+      priceCurrent: 1,
+      currency: 1,
+      tags: 1
+    }
+  }
+}
+
 module.exports = {
   getTattooMachineAggregationPipeline,
   getTagsPipeline,
   getCategoriesPipeline,
   getLabelsPipeline,
-  excludeDetails
+  excludeDetails,
+  getPureFieldsPipeline
 }

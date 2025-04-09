@@ -1,4 +1,11 @@
-const { getTattooMachineById, getTattooMachines } = require("../sevices/tattoo-machine")
+const {
+  getTattooMachineById,
+  getTattooMachines,
+  getCombo,
+  getSameBrand,
+  getSimilar,
+  getRecommendedItems
+} = require("../sevices/tattoo-machine")
 const { BadRequest } = require("../errors")
 const { StatusCodes } = require('http-status-codes')
 const {
@@ -9,6 +16,7 @@ const {
   labelsValidator
 } = require("../validators")
 const { setImageUrls } = require('../utils/tattoo-machines')
+const { TattooMachine } = require("../models");
 
 const getSingleTattooMachine = async (req, res) => {
   const tattooMachineId = req.params.id
@@ -90,11 +98,39 @@ const getAllTattooMachines = async (req, res) => {
   res.status(StatusCodes.OK).json(machines)
 }
 
-const getSetForSingleTattooMachine = async (req, res) => {
+const getRelated = async (req, res) => {
+  const product = await TattooMachine.findById(req.params.id).lean();
+  if (!product) throw new BadRequest(`Tattoo machine with id ${req.params.id} not found`)
 
-}
+  const [combo, recommended, brandItems, similar] = await Promise.all([
+    getCombo({
+      productId: product._id,
+      category: product.category,
+      lang: req.lang
+    }),
+    getRecommendedItems({
+      product
+    }),
+    getSameBrand({
+      productId: product._id,
+      brand: product.brand
+    }),
+    getSimilar({
+      product,
+      lang: req.lang
+    })
+  ])
+
+  res.json({
+    combo,
+    recommended,
+    brands: brandItems,
+    similar
+  });
+};
 
 module.exports = {
   getSingleTattooMachine,
-  getAllTattooMachines
+  getAllTattooMachines,
+  getRelated
 }
