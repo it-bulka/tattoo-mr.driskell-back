@@ -3,7 +3,7 @@ const { serviceType } = require('./services')
 
 const OrderItemSchema = new mongoose.Schema({
   tattooMachineId: { type: mongoose.Types.ObjectId, ref: 'TattooMachine', required: true },
-  quantity: { type: Number, default: 1 },
+  quantity: { type: Number, default: 1, min: 1, required: true },
   nameAtPurchase: { type: String, required: [true, 'Provide name of the tattoo machine at purchase'] },
   priceAtPurchase: { type: Number, required: [true, 'Provide price of the tattoo machine at purchase'] },
   imageAtPurchase: { type: String, required: [true, 'Provide image of the tattoo machine at purchase'] },

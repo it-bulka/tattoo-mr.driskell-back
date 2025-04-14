@@ -65,19 +65,40 @@ const excludeDetails = () => ([
   }
 ])
 
-const getPureFieldsPipeline = () => {
-  return {
-    $project: {
-      id: '$_id',
-      _id: 0,
-      images: 1,
-      title: 1,
-      price: 1,
-      priceCurrent: 1,
-      currency: 1,
-      tags: 1
+const getPureFieldsPipeline = (lang) => {
+  return [
+    {
+      $lookup: {
+        from: "tattoomachinetranslations",
+        localField: "_id",
+        foreignField: "tattooMachineId",
+        as: "translation",
+      }
+    },
+    {
+      $unwind: {
+        path: '$translation',
+        preserveNullAndEmptyArrays: false,
+      }
+    },
+    {
+      $match: {
+        'translation.lang': lang
+      }
+    },
+    {
+      $project: {
+        id: '$_id',
+        _id: 0,
+        images: 1,
+        title: '$translation.title',
+        price: 1,
+        priceCurrent: 1,
+        currency: 1,
+        tags: 1
+      }
     }
-  }
+  ]
 }
 
 module.exports = {
