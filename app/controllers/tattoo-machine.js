@@ -109,11 +109,13 @@ const getRelated = async (req, res) => {
       lang: req.lang
     }),
     getRecommendedItems({
-      product
+      product,
+      lang: req.lang
     }),
     getSameBrand({
       productId: product._id,
-      brand: product.brand
+      brand: product.brand,
+      lang: req.lang
     }),
     getSimilar({
       product,

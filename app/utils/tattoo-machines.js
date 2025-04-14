@@ -43,6 +43,7 @@ const setImageUrls = (machine) => {
   }
 }
 const setMultipleImageUrls = (machines) => {
+  if(!machines) return []
   return machines.map(setImageUrls)
 }
 

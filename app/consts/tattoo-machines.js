@@ -1,15 +1,15 @@
 const compatibleSets = {
-  'tattoo-machines': ['tattoo-needles', 'tattoo-inks', 'power-supplies', 'pedals-and-wires', 'accessories', 'tattoo-sets'],
-  'tattoo-sets': ['tattoo-inks', 'tattoo-needles', 'accessories', 'tattoo-machines'],
-  'tattoo-inks': ['tattoo-machines', 'tattoo-needles', 'accessories', 'tattoo-sets'],
-  'tattoo-needles': ['tattoo-machines', 'tattoo-inks', 'accessories', 'tattoo-sets'],
+  'tattoo-machines': ['tattoo-needles', 'tattoo-inks', 'power-supplies'],
+  'tattoo-sets': ['tattoo-inks', 'tattoo-needles', 'accessories'],
+  'tattoo-inks': ['tattoo-machines', 'tattoo-needles', 'accessories'],
+  'tattoo-needles': ['tattoo-machines', 'tattoo-inks'],
   'tattoo-holders': ['tattoo-machines', 'pedals-and-wires', 'accessories'],
   'tattoo-tips': ['tattoo-machines', 'tattoo-needles', 'tattoo-inks'],
-  'power-supplies': ['tattoo-machines', 'pedals-and-wires', 'tattoo-needles', 'tattoo-inks', 'accessories'],
-  'pedals-and-wires': ['tattoo-machines', 'power-supplies', 'tattoo-holders', 'accessories'],
-  'accessories': ['tattoo-machines', 'tattoo-needles', 'tattoo-inks', 'tattoo-sets', 'pedals-and-wires', 'power-supplies', 'tattoo-holders'],
+  'power-supplies': ['tattoo-machines', 'pedals-and-wires', 'tattoo-needles'],
+  'pedals-and-wires': ['tattoo-machines', 'power-supplies', 'tattoo-holders'],
+  'accessories': ['tattoo-machines', 'tattoo-needles', 'tattoo-inks'],
   'printers-and-tablets': ['accessories', 'tattoo-sets'],
-  'protection-containers-consumables': ['tattoo-machines', 'tattoo-needles', 'tattoo-inks', 'accessories']
+  'protection-containers-consumables': ['tattoo-machines', 'tattoo-needles', 'tattoo-inks']
 }
 
 const specsPropertyList = {

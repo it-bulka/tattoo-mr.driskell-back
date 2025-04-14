@@ -67,7 +67,7 @@ const deleteTranslationsByTattooMachine = async (tattooMachineId) => {
   await TattooMachineTranslation.deleteMany({ tattooMachineId })
 }
 
-const getCombo = async ({ productId, category}) => {
+const getCombo = async ({ productId, category, lang}) => {
   const otherCategories = compatibleSets[category] || []
 
   const combo = await Promise.all(
@@ -75,22 +75,22 @@ const getCombo = async ({ productId, category}) => {
       TattooMachine.aggregate([
         { $match: { category: itemCategory, _id: { $ne: productId } } },
         { $sample: { size: 1 } },
-        getPureFieldsPipeline()
+        ...getPureFieldsPipeline(lang)
       ])
     )
   )
 
-  return combo.flat()
+  return setMultipleImageUrls(combo.flat())
 }
 
-const getSameBrand = async ({ brand, productId }) => {
+const getSameBrand = async ({ brand, productId, lang }) => {
   const brandItems = await TattooMachine.aggregate([
     { $match: { brand, _id: { $ne: productId } } },
-    { $sample: { size: 4 } },
-    getPureFieldsPipeline()
+    { $sample: { size: 15 } },
+    ...getPureFieldsPipeline(lang)
   ])
 
-  return brandItems
+  return setMultipleImageUrls(brandItems)
 }
 
 const getSimilar = async ({ product, lang }) => {
@@ -152,15 +152,15 @@ const getSimilar = async ({ product, lang }) => {
       $sort: { similarity: -1 }
     },
     {
-      $limit: 4
+      $limit: 15
     },
-    getPureFieldsPipeline()
+    ...getPureFieldsPipeline(lang)
   ])
 
-  return similar
+  return setMultipleImageUrls(similar)
 }
 
-const getRecommendedItems = async ({ product }) => {
+const getRecommendedItems = async ({ product, lang }) => {
   const machines  = await TattooMachine.aggregate([
     {
       $match: {
@@ -174,11 +174,11 @@ const getRecommendedItems = async ({ product }) => {
         createdAt: -1
       }
     },
-    { $limit: 4 },
-    getPureFieldsPipeline()
+    { $limit: 15 },
+    ...getPureFieldsPipeline(lang)
   ])
 
-  return machines || []
+  return setMultipleImageUrls(machines) || []
 }
 
 
