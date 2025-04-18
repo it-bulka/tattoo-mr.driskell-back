@@ -26,15 +26,15 @@ const mongoose = require('mongoose')
  */
 
 /**
- * @typedef {('pending'|'shifted'| 'delivered')} OrderStatus
+ * @typedef {('pending'|'shifted'| 'delivered' | "paid" | "expired")} OrderStatus
  */
 
 /**
- * @typedef {('post'|'courier')} DeliveryMethod
+ * @typedef {('novaPoshta'|'courier')} DeliveryMethod
  */
 
 /**
- * @typedef {("credit card"|"paypal")} PaymentMethod
+ * @typedef {('online' | 'cashOnDelivery' | 'bankTransfer')} PaymentMethod
  */
 
 /**

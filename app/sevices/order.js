@@ -1,6 +1,7 @@
-const { PromoCode, TattooMachine, Order } = require('../models')
+const { PromoCode, TattooMachine, TattooMachineTranslation, Order } = require('../models')
 const { applyPromoCode } = require('./promo-codes')
 const { NotFound } = require('../errors')
+const { fractTwoDigit } = require('../utils')
 
 /**
  * Calculates the total service cost for an order based on the selected services
@@ -19,7 +20,7 @@ const { NotFound } = require('../errors')
  *
  * @throws {NotFound} Throws an error if any of the selected services are not found in the database.
  */
-const getOrderService = async (totalOrderCost, selectedServices) => {
+const getOrderService = async (totalOrderCost, selectedServices = []) => {
   let totalPrice = totalOrderCost
   let totalServiceCost = 0
   const orderServices = []
@@ -45,22 +46,43 @@ const getOrderService = async (totalOrderCost, selectedServices) => {
   }
 }
 
-/** @typedef {import('../types').ObjectId} ObjectId */
-/** @typedef {import('../types').ShippingAddress} ShippingAddress */
-/** @typedef {import('../types').TattooMachine} TattooMachine */
-/** @typedef {import('../types').PaymentMethod} PaymentMethod */
-/** @typedef {import('../types').DeloveryMethod} DeloveryMethod */
-/** @typedef {import('../types').Buyer} Buyer */
+/** @typedef {import('../config/types').ObjectId} ObjectId */
+/** @typedef {import('../config/types').ShippingAddress} ShippingAddress */
+/** @typedef {import('../config/types').TattooMachine} TattooMachine */
+/** @typedef {import('../config/types').PaymentMethod} PaymentMethod */
+/** @typedef {import('../config/types').DeloveryMethod} DeloveryMethod */
+/** @typedef {import('../config/types').Buyer} Buyer */
 
-const getTattooMachinesForOrder = async (itemsIds) => {
-  const tattooMachinePromises = itemsIds.map(async (item) => {
-    const machine = await TattooMachine.findById(item._id);
-    if (!machine) throw new NotFound(`Tattoo machine with id ${item._id} not found`);
-    return { price: machine.price, quantity: item.quantity };
-  });
+const getTattooMachinesForOrder = async (cartItems, lang) => {
+  const productIds = cartItems.map(item => item.id)
 
-  const tattooMachines = await Promise.all(tattooMachinePromises)
-  return tattooMachines
+  const machines = await TattooMachine.find({ _id: { $in: productIds } })
+  const translations = await TattooMachineTranslation.find({
+    tattooMachineId: { $in: productIds },
+    lang: lang
+  })
+
+  const translationMap = {}
+  translations.forEach(t => {
+    translationMap[t.tattooMachineId.toString()] = t.title
+  })
+
+  const orderItems = cartItems.map(item => {
+    const machine = machines.find(m => m._id.toString() === item.id)
+    const nameAtPurchase = translationMap[item.id] || 'No translation'
+    const priceAtPurchase = machine.priceCurrent ?? machine.price
+
+    return {
+      tattooMachineId: machine._id,
+      quantity: item.quantity,
+      nameAtPurchase,
+      priceAtPurchase,
+      originalPriceAtPurchase: machine.price,
+      imageAtPurchase: machine.images[0]
+    }
+  })
+
+  return orderItems
 }
 
 /**
@@ -84,13 +106,24 @@ const createOrder = async ({
   deliveryMethod,
   selectedServices,
   buyer
-}) => {
+}, lang) => {
   let totalPrice = 0
   let discount = 0
   let promoCodeId = null
 
-  const tattooMachines = await getTattooMachinesForOrder(items)
-  totalPrice = tattooMachines.reduce((sum, { price, quantity }) => sum + price * quantity, 0)
+  const tattooMachines = await getTattooMachinesForOrder(items, lang)
+  const checkedItems = tattooMachines.reduce((sum, { priceAtPurchase, originalPriceAtPurchase, quantity }) => {
+    const itemOriginalTotalPrice = originalPriceAtPurchase * quantity
+    const itemDiscount = (originalPriceAtPurchase - priceAtPurchase) * quantity
+
+    return {
+      totalPrice: sum.totalPrice + itemOriginalTotalPrice,
+      totalDiscount: sum.totalDiscount + itemDiscount,
+    }
+  }, { totalPrice: 0, totalDiscount: 0 })
+
+  totalPrice = fractTwoDigit(checkedItems.totalPrice)
+  discount = fractTwoDigit(checkedItems.totalDiscount)
 
   if (promoCode) {
     const promo = await applyPromoCode(promoCode, totalPrice)
@@ -101,16 +134,17 @@ const createOrder = async ({
   const {
     totalServiceCost,
     orderServices
-  } = getOrderService(totalPrice, selectedServices)
+  } = await getOrderService(totalPrice, selectedServices)
 
-  const finalPrice = totalPrice - discount
+  const finalPrice = totalPrice + totalServiceCost - discount
 
   const order = new Order({
     userId,
-    items,
-    totalPrice: finalPrice,
+    items: tattooMachines,
+    totalOriginalProductsPrice: fractTwoDigit(totalPrice),
+    totalPrice: fractTwoDigit(finalPrice),
     totalServiceCost,
-    totalDiscounts: discount,
+    totalDiscounts: fractTwoDigit(discount),
     promoCode: promoCodeId,
     services: orderServices,
     shippingAddress,

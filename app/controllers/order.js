@@ -5,16 +5,15 @@ const { NotFound } = require("../errors");
 
 
 const createUserOrder = async (req, res) => {
-  const { userId } = req.params
-
   const {
+    userId,
     items,
     paymentMethod,
     promoCode,
     deliveryMethod,
     selectedServices,
     buyer
-  } = req.params
+  } = req.body
 
   const order = await createOrder({
     userId,
@@ -24,7 +23,7 @@ const createUserOrder = async (req, res) => {
     deliveryMethod,
     selectedServices,
     buyer
-  })
+  }, req.lang)
 
   res.status(StatusCodes.OK).json({ data: order, success: true })
 }
