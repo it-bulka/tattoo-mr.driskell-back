@@ -9,7 +9,6 @@ const getCategoriesPipeline = (categoriesQuery) => {
 }
 
 const getLabelsPipeline = (labelsQuery) => {
-  console.log('labelsQuery', labelsQuery)
   const labelsArray = Array.isArray(labelsQuery) ? labelsQuery : labelsQuery.split(',')
   return [{ $match: { labels: { $in: labelsArray } } }]
 }

@@ -1,10 +1,10 @@
 const fractTwoDigit = (num) => {
-  const fract = Number(num).toFixed(2)
+  const fract = Number(num)
   if (Number.isNaN(fract)) {
     throw Error('Expected number type of data')
   }
 
-  return fract
+  return Number(fract.toFixed(2))
 }
 
 module.exports = {

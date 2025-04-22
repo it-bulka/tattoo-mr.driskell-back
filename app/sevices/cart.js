@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const { Cart } = require('../models/cart')
-const { setUrl } = require('../utils/setUrl')
-const { TattooMachine } = require('../models/tattoo-machine')
+const { setUrl, fractTwoDigit } = require('../utils')
 
 const getUserCart = async (userId, lang) => {
   const cart = await Cart.aggregate([
@@ -10,7 +9,7 @@ const getUserCart = async (userId, lang) => {
     {
       $lookup: {
         from: 'tattoomachines',
-        localField: 'orderItems.product',
+        localField: 'orderItems.id',
         foreignField: '_id',
         as: 'productData'
       }
@@ -46,7 +45,7 @@ const getUserCart = async (userId, lang) => {
       $project: {
         _id: 0,
         productId: '$productData._id',
-        quantity: '$orderItems.amount',
+        quantity: '$orderItems.quantity',
         price: {
           $ifNull: ['$productData.priceCurrent', '$productData.price']
         },
@@ -87,34 +86,12 @@ const getUserCart = async (userId, lang) => {
   return {
     items,
     totalItems,
-    discount,
+    discount: fractTwoDigit(discount),
     extraServices: 0,
-    totalToPay: subtotal
+    totalToPay: fractTwoDigit(subtotal)
   }
 }
 
-const checkExistedTattooMachine = async (orderItems) => {
-  const productIds = orderItems.map(item => item.product)
-
-  const existingProducts = await TattooMachine.find({ _id: { $in: productIds } })
-  const existingIds = new Set(existingProducts.map(p => p._id.toString()))
-
-  const validItems = orderItems.filter(item =>
-    existingIds.has(item.product.toString())
-  )
-
-  if (validItems.length !== orderItems.length) {
-    return {
-      status: 400,
-      error: 'Some products not found',
-      invalidIds: orderItems
-        .filter(item => !existingIds.has(item.product.toString()))
-        .map(item => item.product)
-    }
-  }
-
-  return { status: 200, invalidIds: [] }
-}
 
 const updateUserCart = async (userId, orderItems) => {
   await Cart.updateOne(
@@ -126,6 +103,5 @@ const updateUserCart = async (userId, orderItems) => {
 
 module.exports = {
   getUserCart,
-  checkExistedTattooMachine,
   updateUserCart
 }

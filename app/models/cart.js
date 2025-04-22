@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 
 const SingleCartItemSchema = new mongoose.Schema({
-  amount: { type: Number, required: true, min: 1  },
-  product: {
+  quantity: { type: Number, required: true, min: 1  },
+  id: {
     type: mongoose.Types.ObjectId,
     ref: 'TattooMachine',
     required: true

@@ -30,7 +30,7 @@ const getTattooMachineById = async (id, lang) => {
     ...getTattooMachineAggregationPipeline(lang),
     { $limit: 1 }
   ])
-  console.log('machines', machines)
+
   return machines[0] || null
 }
 
@@ -181,7 +181,11 @@ const getRecommendedItems = async ({ product, lang }) => {
   return setMultipleImageUrls(machines) || []
 }
 
-
+const fetchTattooMachinesByCartItems = async (cartItems) => {
+  const productIds = cartItems.map(item => item.id)
+  const machines = await TattooMachine.find({ _id: { $in: productIds } })
+  return machines
+}
 
 module.exports = {
   getTattooMachineById,
@@ -190,5 +194,6 @@ module.exports = {
   getCombo,
   getSameBrand,
   getSimilar,
-  getRecommendedItems
+  getRecommendedItems,
+  fetchTattooMachinesByCartItems
 }

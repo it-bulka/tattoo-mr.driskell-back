@@ -25,6 +25,7 @@ const tattooMachineRouter = require('./app/routes/tattoo-machines.js')
 const orderRouter = require('./app/routes/order.js')
 const favouritesRouter = require('./app/routes/favourite')
 const carts = require('./app/routes/cart')
+const promo = require('./app/routes/promo')
 
 const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -53,6 +54,7 @@ router.use("/tattoo-machines", tattooMachineRouter)
 router.use("/orders", orderRouter)
 router.use("/favourites", favouritesRouter)
 router.use("/carts", carts)
+router.use("/promo", promo)
 app.use("/api/v1", router)
 
 app.use(notFoundMiddleware)
