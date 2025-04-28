@@ -6,6 +6,7 @@ const {
   getSimilar,
   getRecommendedItems
 } = require("../sevices/tattoo-machine")
+const { setLikesToResult, getUserLikesIds } = require('../sevices')
 
 const { BadRequest } = require("../errors")
 const { StatusCodes } = require('http-status-codes')
@@ -19,6 +20,8 @@ const {
 const { setImageUrls } = require('../utils/tattoo-machines')
 const { TattooMachine } = require("../models");
 const { searchTattooMachines } = require('../sevices/search')
+const { setLikeToSingleResult } = require('../sevices/likes')
+const { setIfLikedSingle, setIfLikedMany } = require("../utils/setIfLiked");
 
 const getSingleTattooMachine = async (req, res) => {
   const tattooMachineId = req.params.id
@@ -31,8 +34,9 @@ const getSingleTattooMachine = async (req, res) => {
   }
 
   const machineWithImgUrl = setImageUrls(machine)
+  const machineWithLikes = await setLikeToSingleResult(machineWithImgUrl)
 
-  res.status(StatusCodes.OK).json(machineWithImgUrl)
+  res.status(StatusCodes.OK).json(machineWithLikes)
 }
 
 const getAllTattooMachines = async (req, res) => {
@@ -97,7 +101,10 @@ const getAllTattooMachines = async (req, res) => {
     throw new BadRequest(`Tattoo machines not found`)
   }
 
-  res.status(StatusCodes.OK).json(machines)
+  const { machines: rawMachines, ...restMachinesData } = machines
+
+  let resultedProducts = await setLikesToResult(rawMachines)
+  res.status(StatusCodes.OK).json({machines: resultedProducts, ...restMachinesData })
 }
 
 const getRelated = async (req, res) => {
@@ -125,11 +132,29 @@ const getRelated = async (req, res) => {
     })
   ])
 
-  res.json({
+  let resultedProducts = {
     combo,
     recommended,
     brands: brandItems,
     similar
+  }
+
+  // TODO: add user middleware, token
+  const userId = '67e423a7338425de0b07ed80'
+  const userLikes = await getUserLikesIds(userId)
+
+  if(userLikes) {
+    resultedProducts.combo = setIfLikedMany(userLikes, combo)
+    resultedProducts.recommended = setIfLikedMany(userLikes, recommended)
+    resultedProducts.brands = setIfLikedMany(userLikes, brandItems)
+    resultedProducts.similar = setIfLikedMany(userLikes, similar)
+  }
+
+  res.json({
+    combo: resultedProducts.combo,
+    recommended: resultedProducts.recommended,
+    brands: resultedProducts.brands,
+    similar: resultedProducts.similar
   });
 };
 
@@ -141,8 +166,10 @@ const getSearchedTattooMachines = async (req, res) => {
   }
 
   const foundMachines = await searchTattooMachines(search)
+  const resultedMachines = await setLikesToResult(foundMachines)
 
-  return res.status(StatusCodes.OK).json({ data: foundMachines, success: true })
+
+  return res.status(StatusCodes.OK).json({ data: resultedMachines, success: true })
 }
 
 module.exports = {
