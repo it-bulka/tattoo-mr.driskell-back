@@ -42,6 +42,8 @@ const setImageUrls = (machine) => {
     images: machine.images.map(img => setUrl(img))
   }
 }
+
+// DO NOT export from ./index.js, could cause circle deps
 const setMultipleImageUrls = (machines) => {
   if(!machines) return []
   return machines.map(setImageUrls)

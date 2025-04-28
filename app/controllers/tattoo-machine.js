@@ -6,6 +6,7 @@ const {
   getSimilar,
   getRecommendedItems
 } = require("../sevices/tattoo-machine")
+
 const { BadRequest } = require("../errors")
 const { StatusCodes } = require('http-status-codes')
 const {
@@ -17,6 +18,7 @@ const {
 } = require("../validators")
 const { setImageUrls } = require('../utils/tattoo-machines')
 const { TattooMachine } = require("../models");
+const { searchTattooMachines } = require('../sevices/search')
 
 const getSingleTattooMachine = async (req, res) => {
   const tattooMachineId = req.params.id
@@ -131,8 +133,21 @@ const getRelated = async (req, res) => {
   });
 };
 
+const getSearchedTattooMachines = async (req, res) => {
+  const { search } = req.query
+
+  if (!search || search.length < 2) {
+    return res.status(400).json({ message: 'Enter at least 2 characters' })
+  }
+
+  const foundMachines = await searchTattooMachines(search)
+
+  return res.status(StatusCodes.OK).json({ data: foundMachines, success: true })
+}
+
 module.exports = {
   getSingleTattooMachine,
   getAllTattooMachines,
-  getRelated
+  getRelated,
+  getSearchedTattooMachines
 }
