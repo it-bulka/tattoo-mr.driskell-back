@@ -21,11 +21,7 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     require: [true, 'Please provide a password'],
-  },
-  likes: [{
-    type: mongoose.Types.ObjectId,
-    ref: 'TattooMachine'
-  }]
+  }
 })
 
 

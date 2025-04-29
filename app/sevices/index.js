@@ -4,7 +4,7 @@ const services = require("./services")
 const cart = require("./cart")
 const cartValidation = require("./cart-validation")
 const promo = require("./promo-codes")
-const likes = require("./likes")
+const favourite = require("./favourite")
 
 module.exports = {
   ...tattooMachine,
@@ -13,5 +13,5 @@ module.exports = {
   ...cart,
   ...cartValidation,
   ...promo,
-  ...likes
+  ...favourite,
 }

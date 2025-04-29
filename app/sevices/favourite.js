@@ -1,13 +1,13 @@
-const mongoose = require('mongoose')
 const { FavouriteMachine, TattooMachine } = require('../models')
 const { setMultipleImageUrls, getTotalCount } = require("../utils/tattoo-machines")
 const { getTattooMachineAggregationPipeline } = require("../utils/getTattooMachineAggregationPipeline")
+const { setIfLikedMany, setIfLikedSingle } = require('../utils/setIfLiked')
 
-const getIdsAllFavouriteTattooMachines = async (req, res) => {
-  const { userId } = req.body
-  const likedMachines = await FavouriteMachine.find({ userId }).select("tattooMachineId")
-  const likedMachineIds = new Set(likedMachines.map(like => like.machineId.toString()))
-  return likedMachineIds
+const getIdsAllFavouriteTattooMachines = async (userId) => {
+  const likedMachines = await FavouriteMachine.find({ userId }).select("tattooMachineId").lean()
+  if(!likedMachines?.length) return null
+
+  return likedMachines
 }
 
 const checkIfFavourite = (likedMachineIds, machine) => {
@@ -45,6 +45,22 @@ const deleteFavouriteTattooMachine = async (favouriteId) => {
   FavouriteMachine.deleteOne({ _id: favouriteId })
 }
 
+const setIfLikedToResult = async (foundProducts, userId = '67e423a7338425de0b07ed80') => {
+  const userLikesIds = await getIdsAllFavouriteTattooMachines(userId)
+
+  if(!userLikesIds) return foundProducts
+
+  return setIfLikedMany(userLikesIds, foundProducts)
+}
+
+
+const setIfLikedToResultForSingle = async (foundProduct, userId = '67e423a7338425de0b07ed80') => {
+  const userLikesIds = await getIdsAllFavouriteTattooMachines(userId)
+  if(!userLikesIds) return foundProduct
+
+  return setIfLikedSingle(userLikesIds, foundProduct)
+}
+
 
 
 module.exports = {
@@ -52,5 +68,7 @@ module.exports = {
   checkIfFavourite,
   getAllFavouriteTattooMachinesByUser,
   setFavouriteTattooMachine,
-  deleteFavouriteTattooMachine
+  deleteFavouriteTattooMachine,
+  setIfLikedToResult,
+  setIfLikedToResultForSingle
 }
