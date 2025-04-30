@@ -7,12 +7,12 @@
 /**
  * Converts an array of Mongo ObjectIDs to a Set of string IDs.
  *
- * @param {Array<FavouriteProduct>} likes - An array of IDs (strings, numbers, or ObjectIds).
+ * @param {Array<import('mongoose').Types.ObjectId>} likes - An array of IDs (strings, numbers, or ObjectIds).
  * @returns {Set<string>} A set of unique string IDs.
  */
 
 const setUniqueIds = (likes) => {
-  return new Set(likes.map(product => product.tattooMachineId.toString()))
+  return new Set(likes.map(id => id.toString()))
 }
 
 

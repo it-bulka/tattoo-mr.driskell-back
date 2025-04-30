@@ -1,9 +1,13 @@
 const {
   getAllFavouriteTattooMachinesByUser,
   setFavouriteTattooMachine,
-  deleteFavouriteTattooMachine
+  deleteFavouriteTattooMachine,
+  getIdsAllFavouriteTattooMachines,
+  setManyFavouriteTattooMachine,
+  deleteManyFavouriteTattooMachine
 } = require('../sevices/favourite')
 const { StatusCodes } = require("http-status-codes");
+const { BadRequest } = require("../errors");
 
 const getAllFavouriteByUser = async (req, res) => {
   const { userId } = req.body
@@ -17,6 +21,14 @@ const getAllFavouriteByUser = async (req, res) => {
   })
 
   res.status(StatusCodes.OK).json({ data: machines, status: "success" })
+}
+
+const getAllFavouriteIdsByUser = async (req, res) => {
+  const { userId } = req.body
+
+  const machinesIds = await getIdsAllFavouriteTattooMachines(userId)
+
+  res.status(StatusCodes.OK).json({ data: machinesIds, success: true })
 }
 
 const setFavourite = async (req, res) => {
@@ -35,13 +47,55 @@ const setFavourite = async (req, res) => {
 }
 
 const deleteFavourite = async (req, res) => {
+  const { userId } = req.body
+
+  if(!userId) {
+    throw BadRequest('Missing user id')
+  }
+
   const { id } = req.params
-  await deleteFavouriteTattooMachine(id)
+  await deleteFavouriteTattooMachine(id, userId)
   res.status(StatusCodes.OK).json({ status: "success" })
+}
+
+const batchFavourite = async (req, res) => {
+  const { userId, idsToAdd, idsToRemove } = req.body
+
+  if(!userId) {
+    throw BadRequest('Missing user id')
+  }
+
+  const result = await Promise.allSettled([
+    setManyFavouriteTattooMachine(idsToAdd, userId),
+    deleteManyFavouriteTattooMachine(idsToRemove, userId)
+  ])
+
+  const fulfilled = result.filter(r => r.status === 'fulfilled')
+  const rejected = result.filter(r => r.status === 'rejected')
+
+  if (fulfilled.length === result.length) {
+    return res.send({ success: true, message: 'All operations fulfilled' })
+  } else if (rejected.length === result.length) {
+    const combinedError = rejected.map(r => r.reason).join('; ')
+    return res.status(500).send({
+      success: false,
+      message: 'All operations failed',
+      error: combinedError
+    });
+  } else {
+    const errorPart = rejected.map(r => r.reason).join('; ')
+    return res.status(207).send({
+      success: false,
+      message: 'Some operation failed',
+      errors: errorPart
+    });
+  }
 }
 
 module.exports = {
   getAllFavouriteByUser,
   setFavourite,
-  deleteFavourite
+  deleteFavourite,
+  getAllFavouriteIdsByUser,
+  batchFavourite
 }
