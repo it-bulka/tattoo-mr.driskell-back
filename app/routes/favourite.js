@@ -9,10 +9,10 @@ const {
 } = require('../controllers/favourite')
 
 router.route('/')
-  .get(getAllFavouriteByUser)
+  .post(getAllFavouriteByUser)
 
 router.route('/ids')
-  .get(getAllFavouriteIdsByUser)
+  .post(getAllFavouriteIdsByUser)
 
 router.route('/batching')
   .post(batchFavourite)
