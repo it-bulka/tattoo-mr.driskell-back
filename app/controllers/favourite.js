@@ -11,12 +11,12 @@ const { BadRequest } = require("../errors");
 
 const getAllFavouriteByUser = async (req, res) => {
   const { userId } = req.body
-  const { page = 1, pageSize = 10 } = req.params
+  const { page = 1, limit = 10 } = req.query
 
   const machines = await getAllFavouriteTattooMachinesByUser({
     userId,
-    page,
-    pageSize,
+    page: Number(page),
+    pageSize: Number(limit),
     lang: req.lang
   })
 
@@ -52,7 +52,7 @@ const deleteFavourite = async (req, res) => {
   if(!userId) {
     throw BadRequest('Missing user id')
   }
-
+  console.log('deleteFavourite', userId)
   const { id } = req.params
   await deleteFavouriteTattooMachine(id, userId)
   res.status(StatusCodes.OK).json({ status: "success" })
