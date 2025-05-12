@@ -10,7 +10,8 @@ const uuid = require('uuid')
 const { issueTokensForUser } = require('../sevices')
 const { getDeviceIdHeader, deleteToken } = require("../sevices/token")
 const { getUserOTD } = require('../utils')
-const { clearCookiesToken } = require('../utils/jwt')
+const { clearCookiesToken, isTokenValid } = require('../utils/jwt')
+const { Token } = require("../models");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body
@@ -123,6 +124,27 @@ const resetPassword = async (req, res) => {
   return res.status(StatusCodes.OK).json({ success: true, data: getUserOTD(user) })
 }
 
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.signedCookies
+
+  if (!refreshToken) {
+    throw new Unauthenticated(`Authentication invalid`)
+  }
+
+  const userData = isTokenValid(refreshToken)
+  const tokenFromDb = await Token.findOne({ refreshToken })
+  if (!userData || !tokenFromDb) {
+    throw new Unauthenticated('Authentication invalid')
+  }
+
+  const user = await User.findOne({ _id: userData.id })
+  const deviceId = getUserOTD(userData)
+
+  const { accessToken } = await issueTokensForUser({ res, user, deviceId})
+
+  return res.status(StatusCodes.OK).json({ data: getUserOTD(user), accessToken, success: true })
+}
+
 
 module.exports = {
   register,
@@ -130,5 +152,6 @@ module.exports = {
   verifyEmail,
   forgotPassword,
   resetPassword,
-  logout
+  logout,
+  refreshToken
 }
