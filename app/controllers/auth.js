@@ -8,8 +8,9 @@ const { registration: userRegistration, verifyUser } = require('../sevices/auth'
 const { sendEmailVerification } = require('../utils/mail')
 const uuid = require('uuid')
 const { issueTokensForUser } = require('../sevices')
-const { getDeviceIdHeader } = require("../sevices/token")
+const { getDeviceIdHeader, deleteToken } = require("../sevices/token")
 const { getUserOTD } = require('../utils')
+const { clearCookiesToken } = require('../utils/jwt')
 
 const register = async (req, res) => {
   const { name, email, password } = req.body
@@ -58,16 +59,27 @@ const verifyEmail = async (req, res) => {
   if(!email || !verificationToken) {
     throw new BadRequest('Please provide email and verificationToken')
   }
+  const deviceId = getDeviceIdHeader({ req })
 
   const user = await verifyUser({ email, verificationToken })
-  const deviceId = getDeviceIdHeader({ req })
   const { accessToken } = await issueTokensForUser({ res, deviceId, user })
 
   return res.status(StatusCodes.OK).json({ data: getUserOTD(user), accessToken, success: true })
 }
 
+const logout = async (req, res) => {
+  const { userId } = req.query
+  const deviceId = req.headers['device-id']
+
+  await deleteToken({ deviceId, userId })
+  await clearCookiesToken(res)
+
+  return res.status(StatusCodes.OK).send()
+}
+
 module.exports = {
   register,
   login,
-  verifyEmail
+  verifyEmail,
+  logout
 }

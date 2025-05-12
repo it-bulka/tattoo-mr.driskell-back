@@ -1,6 +1,6 @@
 const { Token } = require("../models")
 const { Unauthenticated, BadRequest } = require("../errors")
-const { createJWT, attachCookiesToRes } =  require('../utils/jwt')
+const { attachCookiesToRes } =  require('../utils/jwt')
 const jwt = require("jsonwebtoken")
 const { createTokenPayload } = require("../utils");
 
@@ -65,6 +65,7 @@ const issueTokensForUser = async ({ res, user, deviceId }) => {
     deviceId,
     refreshToken: tokens.refreshToken
   })
+  console.log('refreshToken', JSON.stringify(refreshToken.toObject(), null, 2))
 
   await attachCookiesToRes({
     res,
@@ -75,9 +76,14 @@ const issueTokensForUser = async ({ res, user, deviceId }) => {
   return tokens
 }
 
+const deleteToken = async ({ deviceId, userId }) => {
+  await Token.deleteOne({ user: userId, deviceId })
+}
+
 module.exports = {
   generateTokens,
   saveRefreshToken,
   getDeviceIdHeader,
-  issueTokensForUser
+  issueTokensForUser,
+  deleteToken
 }
