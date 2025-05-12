@@ -20,6 +20,7 @@ const errorMiddleware = require('./app/middleware/error-handler')
 const notFoundMiddleware = require('./app/middleware/not-found')
 
 // ROUTES
+const authRouter = require('./app/routes/auth.js')
 const userRouter = require('./app/routes/user.js')
 const tattooMachineRouter = require('./app/routes/tattoo-machines.js')
 const orderRouter = require('./app/routes/order.js')
@@ -49,6 +50,7 @@ app.get('/', (req, res) => {
   res.send('SUCCESS')
 })
 
+router.use("/auth", authRouter)
 router.use("/users", userRouter)
 router.use("/tattoo-machines", tattooMachineRouter)
 router.use("/orders", orderRouter)

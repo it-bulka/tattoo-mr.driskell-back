@@ -5,6 +5,7 @@ const cart = require("./cart")
 const cartValidation = require("./cart-validation")
 const promo = require("./promo-codes")
 const favourite = require("./favourite")
+const tokens = require("./token")
 
 module.exports = {
   ...tattooMachine,
@@ -14,4 +15,5 @@ module.exports = {
   ...cartValidation,
   ...promo,
   ...favourite,
+  ...tokens,
 }

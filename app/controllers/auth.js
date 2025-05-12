@@ -1,24 +1,73 @@
 const User = require("../models/user")
-const StatusCode = require("http-status-codes")
-const { BadRequest } = require("../errors");
+const { StatusCodes } = require("http-status-codes")
+const {
+  BadRequest,
+  Unauthenticated
+} = require("../errors")
+const { registration: userRegistration, verifyUser } = require('../sevices/auth')
+const { sendEmailVerification } = require('../utils/mail')
+const uuid = require('uuid')
+const { issueTokensForUser } = require('../sevices')
+const { getDeviceIdHeader } = require("../sevices/token")
+const { getUserOTD } = require('../utils')
 
 const register = async (req, res) => {
   const { name, email, password } = req.body
-  const isEmailExisted = await User.findOne({ email }).select('email')
-  if (isEmailExisted) {
-    throw new BadRequest("Email already exists")
-  }
 
-  // TODO: verify email
-  const user = await User.create({
+  const verificationToken = uuid.v4()
+  await userRegistration({
     name,
     email,
-    password
+    password,
+    verificationToken
   })
 
-  res.status(StatusCode.OK).json({ data: user, success: true })
+  await sendEmailVerification({
+    email,
+    verificationToken,
+    origin: process.env.CLIENT_ORIGIN
+  })
+
+  return res.status(StatusCodes.OK).send()
+}
+
+const login = async (req, res) => {
+  const { email, password } = req.body
+  if(!email || !password) {
+    throw new BadRequest('Please provide email and password')
+  }
+
+  const user = await User.findOne({ email })
+  if(!user) {
+    throw new Unauthenticated('No credential')
+  }
+
+  const isPasswordMatch = user.comparePassword(password)
+  if(!isPasswordMatch) {
+    throw new Unauthenticated('Password not valid')
+  }
+
+  const deviceId = getDeviceIdHeader({ req })
+  const { accessToken } = await issueTokensForUser({ res, deviceId, user })
+
+  res.status(StatusCodes.OK).json({ data: getUserOTD(user), accessToken, success: true })
+}
+
+const verifyEmail = async (req, res) => {
+  const { email, verificationToken } = req.body
+  if(!email || !verificationToken) {
+    throw new BadRequest('Please provide email and verificationToken')
+  }
+
+  const user = await verifyUser({ email, verificationToken })
+  const deviceId = getDeviceIdHeader({ req })
+  const { accessToken } = await issueTokensForUser({ res, deviceId, user })
+
+  return res.status(StatusCodes.OK).json({ data: getUserOTD(user), accessToken, success: true })
 }
 
 module.exports = {
-  register
+  register,
+  login,
+  verifyEmail
 }

@@ -4,6 +4,7 @@ const order = require("./order")
 const service = require("./services")
 const favourite = require("./favourite-machine")
 const cart = require("./cart")
+const Token = require("./token")
 
 module.exports = {
   TattooMachine, TattooMachineTranslation,
@@ -11,5 +12,6 @@ module.exports = {
   ...order,
   ...service,
   ...favourite,
-  ...cart
+  ...cart,
+  Token
 }

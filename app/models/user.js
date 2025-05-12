@@ -21,9 +21,24 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     require: [true, 'Please provide a password'],
+  },
+  verificationToken: {
+    type: String,
+  },
+  isVerified: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  verificationExpiresAt: {
+    type: Date,
   }
 })
 
+UserSchema.index(
+  { verificationExpiresAt: 1 },
+  { expireAfterSeconds: 0 }
+)
 
 UserSchema.pre('save', async function() {
   if(!this.isModified('password')) return
