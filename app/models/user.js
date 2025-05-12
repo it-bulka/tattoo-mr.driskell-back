@@ -32,7 +32,9 @@ const UserSchema = new mongoose.Schema({
   },
   verificationExpiresAt: {
     type: Date,
-  }
+  },
+  passwordToken: String,
+  passwordTokenExpirationDate: Date,
 })
 
 UserSchema.index(

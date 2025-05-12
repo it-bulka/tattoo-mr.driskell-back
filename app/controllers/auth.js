@@ -5,7 +5,7 @@ const {
   Unauthenticated
 } = require("../errors")
 const { registration: userRegistration, verifyUser } = require('../sevices/auth')
-const { sendEmailVerification } = require('../utils/mail')
+const { sendEmailVerification, sendResetEmail } = require('../utils/mail')
 const uuid = require('uuid')
 const { issueTokensForUser } = require('../sevices')
 const { getDeviceIdHeader, deleteToken } = require("../sevices/token")
@@ -77,9 +77,58 @@ const logout = async (req, res) => {
   return res.status(StatusCodes.OK).send()
 }
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    throw Unauthenticated(`User with email ${email} not found`)
+  }
+
+  const passwordToken = uuid.v4()
+  const expires = 1000 * 60 * 60 * 24 // 1d
+
+  user.passwordToken = passwordToken
+  user.passwordTokenExpirationDate = new Date(Date.now() + expires)
+  await user.save()
+
+  await sendResetEmail({ email, token: passwordToken, origin: process.env.CLIENT_ORIGIN})
+  return res.status(StatusCodes.OK).send()
+}
+
+const resetPassword = async (req, res) => {
+  const { email, token: passwordToken, password } = req.body
+
+  if (!email) {
+    throw new BadRequest(`Please provide valid email`)
+  }
+
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    throw Unauthenticated(`Credentials failed`)
+  }
+
+  const isTokenVerified = user.passwordToken === passwordToken
+  const isTokenExpired = !user.passwordTokenExpirationDate || new Date() > user.passwordTokenExpirationDate
+
+  if (!isTokenVerified || isTokenExpired) {
+    throw new Unauthenticated(`Token not valid`)
+  }
+
+  user.password = password
+  user.passwordToken = ''
+  await user.save()
+
+  return res.status(StatusCodes.OK).json({ success: true, data: getUserOTD(user) })
+}
+
+
 module.exports = {
   register,
   login,
   verifyEmail,
+  forgotPassword,
+  resetPassword,
   logout
 }
