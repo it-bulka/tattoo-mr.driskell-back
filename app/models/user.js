@@ -35,6 +35,12 @@ const UserSchema = new mongoose.Schema({
   },
   passwordToken: String,
   passwordTokenExpirationDate: Date,
+  discount: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 100,
+  },
 })
 
 UserSchema.index(
