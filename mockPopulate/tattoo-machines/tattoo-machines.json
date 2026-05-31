@@ -2,8 +2,10 @@
   {
     "_id": "64f207ff80e4d2243a0b10b1",
     "images": [
-      "https://example.com/images/tattoo_machine_1.jpg",
-      "https://example.com/images/tattoo_machine_2.jpg"
+      "tattoo-machines/6de74a0443c150b1b4af366ade05bb68870ccd91_1_4_yzkplv.png",
+      "tattoo-machines/6de74a0443c150b1b4af366ade05bb68870ccd91_1_iwetx3.png",
+      "tattoo-machines/6de74a0443c150b1b4af366ade05bb68870ccd91_1_3_hdyjzb.png",
+      "tattoo-machines/6de74a0443c150b1b4af366ade05bb68870ccd91_1_2_bvkz4h.png"
     ],
     "tags": ["new", "hit"],
     "translations": [
@@ -24,10 +26,12 @@
   {
     "_id": "64f208fe90e4d2243a0b10b4",
     "images": [
-      "https://example.com/images/tattoo_machine_3.jpg",
-      "https://example.com/images/tattoo_machine_4.jpg"
+      "tattoo-machines/6de74a0443c150b1b4af366ade05bb68870ccd91_1_4_yzkplv.png",
+      "tattoo-machines/6de74a0443c150b1b4af366ade05bb68870ccd91_1_iwetx3.png",
+      "tattoo-machines/6de74a0443c150b1b4af366ade05bb68870ccd91_1_3_hdyjzb.png",
+      "tattoo-machines/6de74a0443c150b1b4af366ade05bb68870ccd91_1_2_bvkz4h.png"
     ],
-    "tags": ["promotion", "discount"],
+    "tags": [],
     "translations": [
       {
         "_id": "64f208fe90e4d2243a0b10b5",
