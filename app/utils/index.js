@@ -3,7 +3,7 @@ const { fractTwoDigit } = require('./fractTwoDigit')
 const { setUrl } = require('./setUrl')
 const { escapeRegex } = require('./escapeRegex')
 const { createTokenPayload } = require('./createTokenPayload')
-const { getUserOTD } = require('./getUserOTD')
+const { toUserDto } = require('./toUserDto')
 
 module.exports = {
   langs,
@@ -12,5 +12,5 @@ module.exports = {
   setUrl,
   escapeRegex,
   createTokenPayload,
-  getUserOTD
+  toUserDto
 }

@@ -9,7 +9,7 @@ const { sendEmailVerification, sendResetEmail } = require('../utils/mail')
 const uuid = require('uuid')
 const { issueTokensForUser } = require('../sevices')
 const { getDeviceIdHeader, deleteToken } = require("../sevices/token")
-const { getUserOTD } = require('../utils')
+const { toUserDto } = require('../utils')
 const { clearCookiesToken, isTokenValid } = require('../utils/jwt')
 const { Token } = require("../models");
 
@@ -52,7 +52,7 @@ const login = async (req, res) => {
   const deviceId = getDeviceIdHeader({ req })
   const { accessToken } = await issueTokensForUser({ res, deviceId, user })
 
-  res.status(StatusCodes.OK).json({ data: getUserOTD(user), accessToken, success: true })
+  res.status(StatusCodes.OK).json({ data: toUserDto(user), accessToken, success: true })
 }
 
 const verifyEmail = async (req, res) => {
@@ -65,7 +65,7 @@ const verifyEmail = async (req, res) => {
   const user = await verifyUser({ email, verificationToken })
   const { accessToken } = await issueTokensForUser({ res, deviceId, user })
 
-  return res.status(StatusCodes.OK).json({ data: getUserOTD(user), accessToken, success: true })
+  return res.status(StatusCodes.OK).json({ data: toUserDto(user), accessToken, success: true })
 }
 
 const logout = async (req, res) => {
@@ -121,7 +121,7 @@ const resetPassword = async (req, res) => {
   user.passwordToken = ''
   await user.save()
 
-  return res.status(StatusCodes.OK).json({ success: true, data: getUserOTD(user) })
+  return res.status(StatusCodes.OK).json({ success: true, data: toUserDto(user) })
 }
 
 const refreshToken = async (req, res) => {
@@ -138,11 +138,11 @@ const refreshToken = async (req, res) => {
   }
 
   const user = await User.findOne({ _id: userData.id })
-  const deviceId = getUserOTD(userData)
+  const { deviceId } = userData
 
   const { accessToken } = await issueTokensForUser({ res, user, deviceId})
 
-  return res.status(StatusCodes.OK).json({ data: getUserOTD(user), accessToken, success: true })
+  return res.status(StatusCodes.OK).json({ data: toUserDto(user), accessToken, success: true })
 }
 
 
