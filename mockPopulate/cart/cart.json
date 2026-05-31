@@ -1,0 +1,25 @@
+{
+  "userId": "67e423a7338425de0b07ed80",
+  "orderItems": [
+    {
+      "amount": 2,
+      "product": "67f697f31b68db8c7a633171"
+    },
+    {
+      "amount": 1,
+      "product": "67f697f31b68db8c7a633180"
+    },
+    {
+      "amount": 3,
+      "product": "67f697f31b68db8c7a63318f"
+    },
+    {
+      "amount": 1,
+      "product": "67f697f31b68db8c7a6331aa"
+    },
+    {
+      "amount": 2,
+      "product": "67f697f31b68db8c7a6331b3"
+    }
+  ]
+}

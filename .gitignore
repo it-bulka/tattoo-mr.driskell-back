@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+# Local dev docs (not for repo)
+docs-dev/
