@@ -13,6 +13,19 @@ const getLocalizedService = async (serviceId, lang = "en") => {
   }
 }
 
+const getAllServices = async (lang = "en") => {
+  const services = await Service.find({ status: 'active' }).lean()
+  return services.map(s => ({
+    _id: s._id,
+    name: s.name[lang] || s.name["en"],
+    description: s.description[lang] || s.description["en"],
+    type: s.type,
+    value: s.value,
+    currency: s.currency,
+  }))
+}
+
 module.exports = {
   getLocalizedService,
+  getAllServices,
 }
