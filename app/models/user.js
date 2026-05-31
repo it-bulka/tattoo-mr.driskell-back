@@ -41,6 +41,13 @@ const UserSchema = new mongoose.Schema({
     min: 0,
     max: 100,
   },
+  phone: String,
+  city: String,
+  street: String,
+  apartment: String,
+  entrance: String,
+  floor: String,
+  doorphone: String,
 })
 
 UserSchema.index(

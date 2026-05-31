@@ -14,4 +14,26 @@ const updatePassword = async (userId, oldPassword, newPassword) => {
   await user.save()
 }
 
-module.exports = { updatePassword }
+const updateUser = async (userId, fields) => {
+  const updateData = Object.fromEntries(
+    Object.entries(fields).filter(([, v]) => v !== undefined)
+  )
+  if (Object.keys(updateData).length === 0) throw new BadRequest('Provide at least one field to update')
+
+  try {
+    const user = await User
+      .findOneAndUpdate({ _id: userId }, updateData, { new: true, runValidators: true })
+      .selectWithoutPassword()
+    if (!user) throw new NotFound('User not found')
+    return user
+  } catch (err) {
+    if (err.code === 11000) {
+      const error = new BadRequest('Email already in use')
+      error.field = 'email'
+      throw error
+    }
+    throw err
+  }
+}
+
+module.exports = { updatePassword, updateUser }
