@@ -4,6 +4,7 @@ const { setUrl } = require('./setUrl')
 const { escapeRegex } = require('./escapeRegex')
 const { createTokenPayload } = require('./createTokenPayload')
 const { toUserDto } = require('./toUserDto')
+const { toOrderDto } = require('./toOrderDto')
 
 module.exports = {
   langs,
@@ -12,5 +13,6 @@ module.exports = {
   setUrl,
   escapeRegex,
   createTokenPayload,
-  toUserDto
+  toUserDto,
+  toOrderDto,
 }

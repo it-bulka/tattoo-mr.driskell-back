@@ -25,6 +25,11 @@ const OrderSchema = new mongoose.Schema({
   shippingAddress: {
     type: Object
   },
+  buyer: {
+    name: String,
+    email: String,
+    phone: String,
+  },
   status: {
     type: String,
     enum: ["pending", "shipped", "delivered", "paid", "expired", "cancelled"],

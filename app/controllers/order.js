@@ -2,6 +2,7 @@ const { StatusCodes } = require("http-status-codes")
 const { createOrder } = require('../sevices')
 const { Order } = require("../models");
 const { NotFound } = require("../errors");
+const { toOrderDto } = require('../utils')
 
 
 const createUserOrder = async (req, res) => {
@@ -40,13 +41,8 @@ const getOrderById = async (req, res) => {
 
 const getAllOrdersByUser = async (req, res) => {
   const { userId } = req.params
-  const orders = await Order.find({ userId: userId })
-
-  if (!orders) {
-    throw new NotFound('Orders not found')
-  }
-
-  res.status(StatusCodes.OK).json({ data: orders, success: true })
+  const orders = await Order.find({ userId })
+  res.status(StatusCodes.OK).json({ data: orders.map(toOrderDto), success: true })
 }
 
 const getAllOrders = async (req, res) => {
