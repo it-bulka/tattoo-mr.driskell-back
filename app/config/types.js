@@ -26,7 +26,7 @@ const mongoose = require('mongoose')
  */
 
 /**
- * @typedef {('pending'|'shifted'| 'delivered' | "paid" | "expired")} OrderStatus
+ * @typedef {('pending'|'shipped'|'delivered'|'paid'|'expired'|'cancelled')} OrderStatus
  */
 
 /**
