@@ -1,6 +1,8 @@
 const { fractTwoDigit, setUrl } = require("../utils")
 const { TattooMachineTranslation, TattooMachine } = require('../models/tattoo-machine')
 const { validateCartItems } = require('../sevices/cart-validation')
+const { Service } = require('../models')
+const { NotFound } = require('../errors')
 
 /** @typedef {import('../config/types').ObjectId} ObjectId */
 /** @typedef {import('../config/types').ShippingAddress} ShippingAddress */
