@@ -1,8 +1,9 @@
 const { StatusCodes } = require("http-status-codes")
 const { createOrder } = require('../sevices')
 const { Order } = require("../models");
-const { NotFound } = require("../errors");
+const { NotFound, BadRequest } = require("../errors");
 const { toOrderDto } = require('../utils')
+const { verifyWebhookSignature, generateCallbackResponseSignature } = require('../sevices/wayforpay')
 
 
 const createUserOrder = async (req, res) => {
@@ -13,20 +14,61 @@ const createUserOrder = async (req, res) => {
     promoCode,
     deliveryMethod,
     selectedServices,
-    buyer
+    buyer,
+    shippingAddress,
   } = req.body
 
-  const order = await createOrder({
-    userId,
-    items,
-    paymentMethod,
-    promoCode,
-    deliveryMethod,
-    selectedServices,
-    buyer
-  }, req.lang)
+  console.log('[createUserOrder] payload:', JSON.stringify({ userId, paymentMethod, deliveryMethod, itemsCount: items?.length, selectedServices }, null, 2))
 
-  res.status(StatusCodes.OK).json({ data: order, success: true })
+  try {
+    const { order, paymentData } = await createOrder({
+      userId,
+      items,
+      paymentMethod,
+      promoCode,
+      deliveryMethod,
+      selectedServices,
+      buyer,
+      shippingAddress,
+    }, req.lang)
+
+    res.status(StatusCodes.OK).json({
+      data: { orderId: order._id, status: order.status, paymentData },
+      success: true,
+    })
+  } catch (err) {
+    console.error('[createUserOrder] Failed:', err)
+    throw err
+  }
+}
+
+const wayforpayCallback = async (req, res) => {
+  const isValid = verifyWebhookSignature(req.body)
+  if (!isValid) {
+    throw new BadRequest('Invalid WayForPay signature')
+  }
+
+  const { orderReference, transactionStatus, transactionId } = req.body
+
+  const order = await Order.findById(orderReference)
+  if (!order) {
+    throw new NotFound('Order not found')
+  }
+
+  if (transactionStatus === 'Approved') {
+    order.status = 'paid'
+    if (transactionId) order.wayforpayTransactionId = String(transactionId)
+    await order.save()
+  } else if (['Declined', 'Expired', 'Voided'].includes(transactionStatus)) {
+    order.status = 'cancelled'
+    await order.save()
+  }
+
+  const time = Math.floor(Date.now() / 1000)
+  const responseStatus = 'accept'
+  const signature = generateCallbackResponseSignature(orderReference, responseStatus, time)
+
+  res.status(StatusCodes.OK).json({ orderReference, status: responseStatus, time, signature })
 }
 
 const getOrderById = async (req, res) => {
@@ -58,5 +100,6 @@ module.exports = {
   createUserOrder,
   getOrderById,
   getAllOrdersByUser,
-  getAllOrders
+  getAllOrders,
+  wayforpayCallback,
 }

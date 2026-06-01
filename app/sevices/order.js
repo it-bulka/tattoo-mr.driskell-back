@@ -2,6 +2,7 @@ const { PromoCode, Order } = require('../models')
 const { applyPromoCode, getPromoCode } = require('./promo-codes')
 const { fractTwoDigit } = require('../utils')
 const { calculateProductPrice, getOrderServiceCost } = require('./price')
+const { generatePaymentData } = require('./wayforpay')
 
 /**
  *
@@ -61,7 +62,8 @@ const createOrder = async ({
     shippingAddress,
     deliveryMethod,
     paymentMethod,
-    buyer
+    buyer,
+    status: paymentMethod === 'online' ? 'pending_payment' : 'pending',
   })
 
   await order.save()
@@ -70,7 +72,9 @@ const createOrder = async ({
     await PromoCode.findByIdAndUpdate(promoCodeId, { $inc: { usedCount: 1 } })
   }
 
-  return order
+  const paymentData = paymentMethod === 'online' ? generatePaymentData(order) : null
+
+  return { order, paymentData }
 }
 
 module.exports = {

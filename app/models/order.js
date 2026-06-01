@@ -32,9 +32,10 @@ const OrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "shipped", "delivered", "paid", "expired", "cancelled"],
+    enum: ["pending", "pending_payment", "shipped", "delivered", "paid", "expired", "cancelled"],
     default: "pending"
   },
+  wayforpayTransactionId: { type: String, default: null },
   paymentMethod: {
     type: String,
     enum: ['online', 'cashOnDelivery', 'bankTransfer'],
