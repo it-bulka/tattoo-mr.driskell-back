@@ -33,7 +33,9 @@ const updateCart = async (req, res) => {
     totalToPay
   } = await getUserCart(userId, req.lang)
 
-  let totalPrice = totalToPay
+  // totalToPay from getUserCart is already the sum of sale prices (priceCurrent * qty),
+  // so `discount` is the visible savings — it must NOT be subtracted again.
+  let finalPrice = totalToPay
   let totalDiscount = discount
   const promocodeData = {
     err: undefined,
@@ -47,8 +49,9 @@ const updateCart = async (req, res) => {
       if(!promo) {
         throw new Error('This promo code is no longer valid.')
       } else {
-        const promoCalculation = await applyPromoCode(promo, totalPrice)
+        const promoCalculation = await applyPromoCode(promo, finalPrice)
         totalDiscount += promoCalculation.discount
+        finalPrice -= promoCalculation.discount
 
         promocodeData.promo = {
           id: promo._id,
@@ -65,8 +68,6 @@ const updateCart = async (req, res) => {
     }
 
   }
-
-  const finalPrice = totalPrice - discount
 
   const resData = {
     items,
