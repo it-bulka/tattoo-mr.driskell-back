@@ -94,66 +94,9 @@ const getSameBrand = async ({ brand, productId, lang }) => {
 }
 
 const getSimilar = async ({ product, lang }) => {
-  const productDetails = await TattooMachineTranslation.findOne({
-    tattooMachineId: product._id,
-    lang: lang
-  }).lean()
-
-  const specsKeys = specsPropertyList[product.category]
-  const orFilters = specsKeys.map(key => ({ [`translation.specs.${key}`]: productDetails.specs[key] }))
-
-  const similarityConditions = specsKeys.map(key => ({
-    $cond: [{ $eq: [`$translation.specs.${key}`, productDetails.specs[key]] }, 1, 0]
-  }))
-
   const similar = await TattooMachine.aggregate([
-    {
-      $match: {
-        _id: { $ne: product._id },
-        category: product.category,
-      }
-    },
-    {
-      $lookup: {
-        from: "tattoomachinetranslations",
-        let: { productId: "$_id", lang: lang },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ["$tattooMachineId", "$$productId"] },
-                  { $eq: ["$lang", "$$lang"] }
-                ]
-              }
-            }
-          }
-        ],
-        as: "translation"
-      }
-    },
-    {
-      $unwind: {
-        path: '$translation',
-        preserveNullAndEmptyArrays: false,
-      }
-    },
-    {
-      $match: { $or: orFilters }
-    },
-    {
-      $addFields: {
-        similarity: {
-          $add: similarityConditions
-        }
-      }
-    },
-    {
-      $sort: { similarity: -1 }
-    },
-    {
-      $limit: 15
-    },
+    { $match: { category: product.category, _id: { $ne: product._id } } },
+    { $sample: { size: 15 } },
     ...getPureFieldsPipeline(lang)
   ])
 
