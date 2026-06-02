@@ -17,6 +17,8 @@ const getSpecsPipeline = (field, values) => {
 
 const getInStockPipeline = () => [{ $match: { stock: { $gt: 0 } } }]
 
+const getBrandPipeline = (brandId) => [{ $match: { brand: brandId } }]
+
 const getPricePipeline = (minPrice, maxPrice) => {
   const cond = {}
   if (minPrice !== undefined) cond.$gte = Number(minPrice)
@@ -133,6 +135,7 @@ module.exports = {
   getLabelsPipeline,
   getSpecsPipeline,
   getInStockPipeline,
+  getBrandPipeline,
   getPricePipeline,
   getSortStage,
   getAlphabeticallySortPipeline,

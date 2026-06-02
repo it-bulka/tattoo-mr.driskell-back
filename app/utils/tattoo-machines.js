@@ -6,6 +6,7 @@ const {
   getLabelsPipeline,
   getSpecsPipeline,
   getInStockPipeline,
+  getBrandPipeline,
   getPricePipeline,
   getSortStage,
   getAlphabeticallySortPipeline,
@@ -15,12 +16,13 @@ const { setUrl } = require('./setUrl')
 
 const getTattooMachinesWithPagination = async ({
   page, pageSize, lang, tags, category, label, detailed,
-  sort, inStock, motorType, needleType, minPrice, maxPrice
+  sort, inStock, motorType, needleType, minPrice, maxPrice, brandId
 }) => {
   const sortStage = getSortStage(sort)
   const result = await TattooMachine.aggregate([
     ...(sortStage ? [sortStage] : []),
     ...(inStock ? getInStockPipeline() : []),
+    ...(brandId ? getBrandPipeline(brandId) : []),
     ...((minPrice !== undefined || maxPrice !== undefined) ? getPricePipeline(minPrice, maxPrice) : []),
     ...getTattooMachineAggregationPipeline(lang),
     ...(tags ? getTagsPipeline(tags) : []),

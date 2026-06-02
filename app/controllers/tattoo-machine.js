@@ -20,6 +20,7 @@ const {
 } = require("../validators")
 const { setImageUrls } = require('../utils/tattoo-machines')
 const { TattooMachine } = require("../models")
+const { Brand } = require('../models/brands')
 const { searchTattooMachines } = require('../sevices/search')
 
 const getSingleTattooMachine = async (req, res) => {
@@ -136,6 +137,16 @@ const getAllTattooMachines = async (req, res) => {
     } else {
       params.maxPrice = val
     }
+  }
+
+  if (filters.brandSlug) {
+    const brand = await Brand.findOne({
+      name: { $regex: new RegExp(filters.brandSlug.replace(/-/g, '[\\s\\-]'), 'i') }
+    })
+    if (!brand) {
+      throw new BadRequest(`Brand '${filters.brandSlug}' not found`)
+    }
+    params.brandId = brand._id
   }
 
   if(errors.length) {
