@@ -23,6 +23,8 @@ const { TattooMachine } = require("../models")
 const { Brand } = require('../models/brands')
 const { searchTattooMachines } = require('../sevices/search')
 
+const ALLOWED_SEARCH_LANGS = ['en', 'uk']
+
 const getSingleTattooMachine = async (req, res) => {
   const tattooMachineId = req.params.id
   const lang = req.lang
@@ -196,13 +198,14 @@ const getRelated = async (req, res) => {
 };
 
 const getSearchedTattooMachines = async (req, res) => {
-  const { search } = req.query
+  const { search, lang } = req.query
 
   if (!search || search.length < 2) {
     return res.status(400).json({ message: 'Enter at least 2 characters' })
   }
 
-  const foundMachines = await searchTattooMachines(search)
+  const resolvedLang = ALLOWED_SEARCH_LANGS.includes(lang) ? lang : 'uk'
+  const foundMachines = await searchTattooMachines(search, resolvedLang)
 
   return res.status(StatusCodes.OK).json({ data: foundMachines, success: true })
 }

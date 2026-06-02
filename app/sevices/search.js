@@ -2,11 +2,12 @@ const { TattooMachineTranslation } = require('../models/tattoo-machine')
 const { escapeRegex } = require('../utils')
 const { setMultipleImageUrls } = require('../utils/tattoo-machines')
 
-const searchTattooMachines = async (searchBy) => {
+const searchTattooMachines = async (searchBy, lang) => {
   const search = escapeRegex(searchBy.trim()).split(/\s+/).join('.*')
 
   const result = await TattooMachineTranslation.aggregate([
-    { $match: { title: { $regex: search, $options: 'i' } } },
+    { $match: { title: { $regex: search, $options: 'i' }, lang } },
+    { $limit: 30 },
     {
       $lookup: {
         from: 'tattoomachines',
