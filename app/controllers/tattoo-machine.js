@@ -14,7 +14,9 @@ const {
   pageValidator,
   limitValidator,
   categoriesValidator,
-  labelsValidator
+  labelsValidator,
+  motorTypeValidator,
+  needleTypeValidator,
 } = require("../validators")
 const { setImageUrls } = require('../utils/tattoo-machines')
 const { TattooMachine } = require("../models")
@@ -85,6 +87,55 @@ const getAllTattooMachines = async (req, res) => {
     }
 
     params.pageSize = limit
+  }
+
+  if(filters.sort) {
+    const allowed = ['popular', 'cheap', 'expensive', 'alphabetically']
+    if (!allowed.includes(filters.sort)) {
+      errors.push(`Invalid 'sort' parameter. Allowed values: ${allowed.join(', ')}`)
+    } else {
+      params.sort = filters.sort
+    }
+  }
+
+  if(filters.inStock === 'true') {
+    params.inStock = true
+  }
+
+  if(filters.motorType) {
+    const err = motorTypeValidator(filters.motorType)
+    if(err) {
+      errors.push(err)
+    } else {
+      params.motorType = filters.motorType
+    }
+  }
+
+  if(filters.needleType) {
+    const err = needleTypeValidator(filters.needleType)
+    if(err) {
+      errors.push(err)
+    } else {
+      params.needleType = filters.needleType
+    }
+  }
+
+  if(filters.minPrice !== undefined) {
+    const val = Number(filters.minPrice)
+    if (isNaN(val) || val < 0) {
+      errors.push(`Invalid 'minPrice' parameter. Must be a non-negative number.`)
+    } else {
+      params.minPrice = val
+    }
+  }
+
+  if(filters.maxPrice !== undefined) {
+    const val = Number(filters.maxPrice)
+    if (isNaN(val) || val < 0) {
+      errors.push(`Invalid 'maxPrice' parameter. Must be a non-negative number.`)
+    } else {
+      params.maxPrice = val
+    }
   }
 
   if(errors.length) {

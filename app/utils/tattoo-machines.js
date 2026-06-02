@@ -1,20 +1,34 @@
 const { TattooMachine } = require('../models')
 const {
-  getTattooMachineAggregationPipeline, getTagsPipeline,getCategoriesPipeline,
+  getTattooMachineAggregationPipeline,
+  getTagsPipeline,
+  getCategoriesPipeline,
   getLabelsPipeline,
-  excludeDetails
+  getSpecsPipeline,
+  getInStockPipeline,
+  getPricePipeline,
+  getSortStage,
+  getAlphabeticallySortPipeline,
+  excludeDetails,
 } = require('./getTattooMachineAggregationPipeline')
 const { setUrl } = require('./setUrl')
 
 const getTattooMachinesWithPagination = async ({
-  page, pageSize, lang, tags, category, label, detailed
+  page, pageSize, lang, tags, category, label, detailed,
+  sort, inStock, motorType, needleType, minPrice, maxPrice
 }) => {
+  const sortStage = getSortStage(sort)
   const result = await TattooMachine.aggregate([
-    { $sort: { createdAt: -1 } },
+    ...(sortStage ? [sortStage] : []),
+    ...(inStock ? getInStockPipeline() : []),
+    ...((minPrice !== undefined || maxPrice !== undefined) ? getPricePipeline(minPrice, maxPrice) : []),
     ...getTattooMachineAggregationPipeline(lang),
     ...(tags ? getTagsPipeline(tags) : []),
     ...(category ? getCategoriesPipeline(category) : []),
     ...(label ? getLabelsPipeline(label) : []),
+    ...(motorType ? getSpecsPipeline('motorType', motorType) : []),
+    ...(needleType ? getSpecsPipeline('needleType', needleType) : []),
+    ...getAlphabeticallySortPipeline(sort),
     ...(!detailed ? excludeDetails() : []),
     { $facet: {
         data: [

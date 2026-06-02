@@ -3,11 +3,15 @@ const pageValidator = require('./pageValidator')
 const limitValidator = require('./limitValidator')
 const categoriesValidator = require('./categoriesValidator')
 const labelsValidator = require('./labelsValidator')
+const motorTypeValidator = require('./motorTypeValidator')
+const needleTypeValidator = require('./needleTypeValidator')
 
 module.exports = {
   tagsValidator,
   pageValidator,
   limitValidator,
   categoriesValidator,
-  labelsValidator
+  labelsValidator,
+  motorTypeValidator,
+  needleTypeValidator,
 }

@@ -1,3 +1,29 @@
+const getSortStage = (sort) => {
+  switch (sort) {
+    case 'cheap':         return { $sort: { price: 1 } }
+    case 'expensive':     return { $sort: { price: -1 } }
+    case 'alphabetically': return null // applied after translation join
+    default:              return { $sort: { createdAt: -1 } }
+  }
+}
+
+const getAlphabeticallySortPipeline = (sort) =>
+  sort === 'alphabetically' ? [{ $sort: { title: 1 } }] : []
+
+const getSpecsPipeline = (field, values) => {
+  const arr = Array.isArray(values) ? values : values.split(',')
+  return [{ $match: { [`specs.${field}`]: { $in: arr } } }]
+}
+
+const getInStockPipeline = () => [{ $match: { stock: { $gt: 0 } } }]
+
+const getPricePipeline = (minPrice, maxPrice) => {
+  const cond = {}
+  if (minPrice !== undefined) cond.$gte = Number(minPrice)
+  if (maxPrice !== undefined) cond.$lte = Number(maxPrice)
+  return [{ $match: { price: cond } }]
+}
+
 const getTagsPipeline = (tagsQuery) => {
   const tagsArray = Array.isArray(tagsQuery) ? tagsQuery : tagsQuery.split(',')
   return [{ $match: { tags: { $in: tagsArray } } }]
@@ -105,6 +131,11 @@ module.exports = {
   getTagsPipeline,
   getCategoriesPipeline,
   getLabelsPipeline,
+  getSpecsPipeline,
+  getInStockPipeline,
+  getPricePipeline,
+  getSortStage,
+  getAlphabeticallySortPipeline,
   excludeDetails,
   getPureFieldsPipeline
 }
