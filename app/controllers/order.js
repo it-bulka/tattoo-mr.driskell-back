@@ -83,8 +83,24 @@ const getOrderById = async (req, res) => {
 
 const getAllOrdersByUser = async (req, res) => {
   const { userId } = req.params
-  const orders = await Order.find({ userId })
-  res.status(StatusCodes.OK).json({ data: orders.map(toOrderDto), success: true })
+  const page = Math.max(1, Number(req.query.page) || 1)
+  const limit = Math.max(1, Number(req.query.limit) || 10)
+  const skip = (page - 1) * limit
+
+  const [orders, totalCount] = await Promise.all([
+    Order.find({ userId }).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Order.countDocuments({ userId }),
+  ])
+
+  const totalPages = Math.ceil(totalCount / limit)
+
+  res.status(StatusCodes.OK).json({
+    data: orders.map(toOrderDto),
+    totalPages,
+    currentPage: page,
+    hasMore: page < totalPages,
+    success: true,
+  })
 }
 
 const getAllOrders = async (req, res) => {
