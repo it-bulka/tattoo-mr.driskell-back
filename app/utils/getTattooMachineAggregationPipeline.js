@@ -44,10 +44,10 @@ const getLabelsPipeline = (labelsQuery) => {
 const getTattooMachineAggregationPipeline = (lang) => [
   {
     $lookup: {
-      from: "tattoomachinetranslations",
-      localField: "_id",
-      foreignField: "tattooMachineId",
-      as: "translation",
+      from: 'tattoomachinetranslations',
+      localField: '_id',
+      foreignField: 'tattooMachineId',
+      as: 'translation',
     }
   },
   {
@@ -57,8 +57,46 @@ const getTattooMachineAggregationPipeline = (lang) => [
     }
   },
   {
-    $match: {
-      'translation.lang': lang
+    $match: { 'translation.lang': lang }
+  },
+  {
+    $lookup: {
+      from: 'brands',
+      localField: 'brand',
+      foreignField: '_id',
+      as: 'brandData'
+    }
+  },
+  {
+    $unwind: {
+      path: '$brandData',
+      preserveNullAndEmptyArrays: true,
+    }
+  },
+  {
+    $lookup: {
+      from: 'brandtranslations',
+      let: { brandId: '$brandData._id' },
+      pipeline: [
+        { $match: { $expr: { $eq: ['$brandId', '$$brandId'] } } }
+      ],
+      as: 'brandTranslations'
+    }
+  },
+  {
+    $addFields: {
+      brandTransReq: {
+        $arrayElemAt: [
+          { $filter: { input: '$brandTranslations', cond: { $eq: ['$$this.lang', lang] } } },
+          0
+        ]
+      },
+      brandTransDef: {
+        $arrayElemAt: [
+          { $filter: { input: '$brandTranslations', cond: { $eq: ['$$this.lang', '$brandData.defaultLang'] } } },
+          0
+        ]
+      }
     }
   },
   {
@@ -77,6 +115,12 @@ const getTattooMachineAggregationPipeline = (lang) => [
       tags: '$tags',
       category: 1,
       labels: 1,
+      brand: {
+        id: '$brandData._id',
+        slug: '$brandData.slug',
+        imgUrl: '$brandData.imgUrl',
+        name: { $ifNull: ['$brandTransReq.name', '$brandTransDef.name'] }
+      }
     }
   }
 ]
@@ -96,10 +140,10 @@ const getPureFieldsPipeline = (lang) => {
   return [
     {
       $lookup: {
-        from: "tattoomachinetranslations",
-        localField: "_id",
-        foreignField: "tattooMachineId",
-        as: "translation",
+        from: 'tattoomachinetranslations',
+        localField: '_id',
+        foreignField: 'tattooMachineId',
+        as: 'translation',
       }
     },
     {
@@ -109,9 +153,7 @@ const getPureFieldsPipeline = (lang) => {
       }
     },
     {
-      $match: {
-        'translation.lang': lang
-      }
+      $match: { 'translation.lang': lang }
     },
     {
       $project: {
