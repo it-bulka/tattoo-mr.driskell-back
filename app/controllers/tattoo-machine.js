@@ -142,9 +142,7 @@ const getAllTattooMachines = async (req, res) => {
   }
 
   if (filters.brandSlug) {
-    const brand = await Brand.findOne({
-      name: { $regex: new RegExp(filters.brandSlug.replace(/-/g, '[\\s\\-]'), 'i') }
-    })
+    const brand = await Brand.findOne({ slug: filters.brandSlug })
     if (!brand) {
       throw new BadRequest(`Brand '${filters.brandSlug}' not found`)
     }
