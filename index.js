@@ -30,6 +30,7 @@ const promo = require('./app/routes/promo')
 const servicesRouter = require('./app/routes/service')
 const brandsRouter = require('./app/routes/brands')
 const discountRouter = require('./app/routes/discount')
+const bundleRouter = require('./app/routes/bundle')
 
 const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -63,6 +64,7 @@ router.use("/promo", promo)
 router.use("/services", servicesRouter)
 router.use("/brands", brandsRouter)
 router.use("/discounts", discountRouter)
+router.use("/bundles", bundleRouter)
 app.use("/api/v1", router)
 
 app.use(notFoundMiddleware)

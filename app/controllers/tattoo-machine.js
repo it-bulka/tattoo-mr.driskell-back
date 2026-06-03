@@ -4,9 +4,10 @@ const {
   getCombo,
   getSameBrand,
   getSimilar,
-  getRecommendedItems
+  getRecommendedItems,
+  fetchProductsByIds
 } = require("../sevices/tattoo-machine")
-const { getBundleTiersForCombo } = require('../sevices/discount')
+const { getBundleForProduct } = require('../sevices/bundle')
 
 const { BadRequest } = require("../errors")
 const { StatusCodes } = require('http-status-codes')
@@ -171,29 +172,21 @@ const getRelated = async (req, res) => {
   const product = await TattooMachine.findById(req.params.id).lean();
   if (!product) throw new BadRequest(`Tattoo machine with id ${req.params.id} not found`)
 
-  const [combo, recommended, brandItems, similar] = await Promise.all([
-    getCombo({
-      productId: product._id,
-      category: product.category,
-      lang: req.lang
-    }),
-    getRecommendedItems({
-      product,
-      lang: req.lang
-    }),
-    getSameBrand({
-      productId: product._id,
-      brand: product.brand,
-      lang: req.lang
-    }),
-    getSimilar({
-      product,
-      lang: req.lang
-    })
+  const [bundle, recommended, brandItems, similar] = await Promise.all([
+    getBundleForProduct(product._id),
+    getRecommendedItems({ product, lang: req.lang }),
+    getSameBrand({ productId: product._id, brand: product.brand, lang: req.lang }),
+    getSimilar({ product, lang: req.lang })
   ])
 
-  const comboIds = combo.map(p => p.id)
-  const bundleDiscountTiers = await getBundleTiersForCombo(comboIds)
+  let combo, bundleDiscountTiers
+  if (bundle) {
+    combo = await fetchProductsByIds(bundle.comboProductIds, req.lang)
+    bundleDiscountTiers = bundle.tiers
+  } else {
+    combo = await getCombo({ productId: product._id, category: product.category, lang: req.lang })
+    bundleDiscountTiers = null
+  }
 
   res.json({
     combo,

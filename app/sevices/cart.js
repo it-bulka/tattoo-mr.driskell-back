@@ -2,9 +2,10 @@ const mongoose = require('mongoose')
 const { Cart } = require('../models/cart')
 const { setUrl, fractTwoDigit } = require('../utils')
 const { getActiveDiscounts, applyDiscountsToProducts, applyCartDiscount } = require('./discount')
+const { getActiveBundles, applyBundleDiscountToCart } = require('./bundle')
 
 const getUserCart = async (userId, lang) => {
-  const [cartRaw, activeDiscounts] = await Promise.all([
+  const [cartRaw, activeDiscounts, activeBundles] = await Promise.all([
     Cart.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       { $unwind: '$orderItems' },
@@ -56,7 +57,8 @@ const getUserCart = async (userId, lang) => {
         }
       }
     ]),
-    getActiveDiscounts()
+    getActiveDiscounts(),
+    getActiveBundles()
   ])
 
   if (!cartRaw) return null
@@ -94,15 +96,19 @@ const getUserCart = async (userId, lang) => {
     }
   })
 
-  const cartDiscount = applyCartDiscount(subtotal, activeDiscounts)
+  const cartItemIds = items.map(i => i.productId.toString())
+  const bundleDiscount = applyBundleDiscountToCart(cartItemIds, activeBundles, items)
+  const subtotalAfterBundle = subtotal - bundleDiscount
+  const cartDiscount = applyCartDiscount(subtotalAfterBundle, activeDiscounts)
 
   return {
     items,
     totalItems,
     discount: fractTwoDigit(discount),
+    bundleDiscount: fractTwoDigit(bundleDiscount),
     cartDiscount,
     extraServices: 0,
-    totalToPay: fractTwoDigit(subtotal - cartDiscount)
+    totalToPay: fractTwoDigit(subtotalAfterBundle - cartDiscount)
   }
 }
 

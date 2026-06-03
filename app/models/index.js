@@ -3,6 +3,7 @@ const { Brand } = require("./brands")
 const { BrandTranslation } = require("./brand-translation")
 const { PromoCode } = require("./promo-codes")
 const { Discount } = require("./discount")
+const { Bundle } = require("./bundle")
 const order = require("./order")
 const service = require("./services")
 const favourite = require("./favourite-machine")
@@ -14,6 +15,7 @@ module.exports = {
   Brand, BrandTranslation,
   PromoCode,
   Discount,
+  Bundle,
   ...order,
   ...service,
   ...favourite,

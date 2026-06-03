@@ -146,6 +146,20 @@ const getRecommendedItems = async ({ product, lang }) => {
   return applyDiscountsToProducts(setMultipleImageUrls(machines) || [], activeDiscounts)
 }
 
+const fetchProductsByIds = async (productIds, lang) => {
+  const objectIds = productIds.map(id => new mongoose.Types.ObjectId(id))
+
+  const [products, activeDiscounts] = await Promise.all([
+    TattooMachine.aggregate([
+      { $match: { _id: { $in: objectIds } } },
+      ...getPureFieldsPipeline(lang)
+    ]),
+    getActiveDiscounts()
+  ])
+
+  return applyDiscountsToProducts(setMultipleImageUrls(products), activeDiscounts)
+}
+
 const fetchTattooMachinesByCartItems = async (cartItems) => {
   const productIds = cartItems.map(item => item.id)
   const machines = await TattooMachine.find({ _id: { $in: productIds } })
@@ -160,5 +174,6 @@ module.exports = {
   getSameBrand,
   getSimilar,
   getRecommendedItems,
-  fetchTattooMachinesByCartItems
+  fetchTattooMachinesByCartItems,
+  fetchProductsByIds
 }
