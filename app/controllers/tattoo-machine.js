@@ -150,6 +150,10 @@ const getAllTattooMachines = async (req, res) => {
     params.brandId = brand._id
   }
 
+  if (filters.onlyDiscounted === 'true') {
+    params.onlyDiscounted = true
+  }
+
   if(errors.length) {
     throw new BadRequest(errors.join('\n'))
   }

@@ -85,6 +85,24 @@ const applyCartDiscount = (totalPrice, activeDiscounts) => {
   return fractTwoDigit(Math.min(totalDiscount, totalPrice))
 }
 
+const buildDiscountedProductsFilter = (activeDiscounts) => {
+  const productIds = []
+  const categories = []
+
+  activeDiscounts.forEach(d => {
+    if (d.type === 'product') productIds.push(...d.productIds)
+    if (d.type === 'category') categories.push(...d.categories)
+  })
+
+  const orConditions = [
+    { $expr: { $and: [{ $ne: ['$priceCurrent', null] }, { $lt: ['$priceCurrent', '$price'] }] } }
+  ]
+  if (productIds.length) orConditions.push({ _id: { $in: productIds } })
+  if (categories.length) orConditions.push({ category: { $in: categories } })
+
+  return [{ $match: { $or: orConditions } }]
+}
+
 const getBundleTiersForCombo = async (productIds) => {
   if (!productIds.length) return null
 
@@ -106,5 +124,6 @@ module.exports = {
   getActiveDiscounts,
   applyDiscountsToProducts,
   applyCartDiscount,
-  getBundleTiersForCombo
+  getBundleTiersForCombo,
+  buildDiscountedProductsFilter
 }

@@ -11,7 +11,7 @@ const {
   setMultipleImageUrls,
   getTotalCount
 } = require('../utils/tattoo-machines')
-const { getActiveDiscounts, applyDiscountsToProducts } = require('./discount')
+const { getActiveDiscounts, applyDiscountsToProducts, buildDiscountedProductsFilter } = require('./discount')
 
 const { compatibleSets, specsPropertyList } = require('../consts/tattoo-machines')
 
@@ -56,12 +56,14 @@ const getTattooMachineById = async (id, lang) => {
  * @returns {Promise<PaginatedTattooMachines>} - A promise that resolves to an object containing pagination data for tattoo machines.
  */
 const getTattooMachines = async (params, lang) => {
-  const { page = 1, pageSize = 10, ...rest } = params
+  const { page = 1, pageSize = 10, onlyDiscounted, ...rest } = params
 
-  const [{ machines, totalCount }, activeDiscounts] = await Promise.all([
-    getTattooMachinesWithPagination({ page, pageSize, lang, ...rest }),
-    getActiveDiscounts()
-  ])
+  const activeDiscounts = await getActiveDiscounts()
+  const discountedFilter = onlyDiscounted ? buildDiscountedProductsFilter(activeDiscounts) : []
+
+  const { machines, totalCount } = await getTattooMachinesWithPagination({
+    page, pageSize, lang, discountedFilter, ...rest
+  })
 
   const machinesWithImgUrl = setMultipleImageUrls(machines)
   const machinesWithDiscounts = applyDiscountsToProducts(machinesWithImgUrl, activeDiscounts)

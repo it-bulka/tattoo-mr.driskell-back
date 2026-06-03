@@ -16,10 +16,11 @@ const { setUrl } = require('./setUrl')
 
 const getTattooMachinesWithPagination = async ({
   page, pageSize, lang, tags, category, label, detailed,
-  sort, inStock, motorType, needleType, minPrice, maxPrice, brandId
+  sort, inStock, motorType, needleType, minPrice, maxPrice, brandId, discountedFilter = []
 }) => {
   const sortStage = getSortStage(sort)
   const result = await TattooMachine.aggregate([
+    ...discountedFilter,
     ...(sortStage ? [sortStage] : []),
     ...(inStock ? getInStockPipeline() : []),
     ...(brandId ? getBrandPipeline(brandId) : []),
