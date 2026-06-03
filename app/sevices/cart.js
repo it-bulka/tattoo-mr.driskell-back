@@ -3,6 +3,7 @@ const { Cart } = require('../models/cart')
 const { setUrl, fractTwoDigit } = require('../utils')
 const { getActiveDiscounts, applyDiscountsToProducts, applyCartDiscount } = require('./discount')
 const { getActiveBundles, applyBundleDiscountToCart } = require('./bundle')
+const { fetchProductsByIds } = require('./tattoo-machine')
 
 const getUserCart = async (userId, lang) => {
   const [cartRaw, activeDiscounts, activeBundles] = await Promise.all([
@@ -113,6 +114,55 @@ const getUserCart = async (userId, lang) => {
 }
 
 
+const calculateCart = async (orderItems, lang) => {
+  const productIds = orderItems.map(i => i.id)
+
+  const [products, activeDiscounts, activeBundles] = await Promise.all([
+    fetchProductsByIds(productIds, lang),
+    getActiveDiscounts(),
+    getActiveBundles()
+  ])
+
+  let totalItems = 0, subtotal = 0, discount = 0
+
+  const items = orderItems.map(orderItem => {
+    const product = products.find(p => p.id === orderItem.id.toString())
+    if (!product) return null
+
+    const effectivePrice = product.priceCurrent ?? product.price
+    const qty = orderItem.quantity
+
+    discount += (product.price - effectivePrice) * qty
+    totalItems += qty
+    subtotal += effectivePrice * qty
+
+    return {
+      productId: orderItem.id,
+      title: product.title,
+      price: effectivePrice,
+      originalPrice: product.price,
+      quantity: qty,
+      total: fractTwoDigit(effectivePrice * qty),
+      image: product.images[0] || ''
+    }
+  }).filter(Boolean)
+
+  const cartItemIds = items.map(i => i.productId.toString())
+  const bundleDiscount = applyBundleDiscountToCart(cartItemIds, activeBundles, items)
+  const subtotalAfterBundle = subtotal - bundleDiscount
+  const cartDiscount = applyCartDiscount(subtotalAfterBundle, activeDiscounts)
+
+  return {
+    items,
+    totalItems,
+    discount: fractTwoDigit(discount),
+    bundleDiscount: fractTwoDigit(bundleDiscount),
+    cartDiscount: fractTwoDigit(cartDiscount),
+    extraServices: 0,
+    totalToPay: fractTwoDigit(subtotalAfterBundle - cartDiscount)
+  }
+}
+
 const updateUserCart = async (userId, orderItems) => {
   await Cart.updateOne(
     { userId },
@@ -123,5 +173,6 @@ const updateUserCart = async (userId, orderItems) => {
 
 module.exports = {
   getUserCart,
-  updateUserCart
+  updateUserCart,
+  calculateCart
 }

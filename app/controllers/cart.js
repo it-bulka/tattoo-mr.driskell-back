@@ -1,6 +1,6 @@
 const { getUserCart, validateCartItems, applyPromoCode, getPromoCode } = require('../sevices')
-const { BadRequest, NotFound } = require("../errors")
-const { updateUserCart } = require('../sevices/cart')
+const { BadRequest } = require("../errors")
+const { updateUserCart, calculateCart } = require('../sevices/cart')
 const { cartPopulate } = require("../../mockPopulate/cart/cart-populate");
 
 const getCart = async (req, res) => {
@@ -28,6 +28,8 @@ const updateCart = async (req, res) => {
   const {
     items,
     discount,
+    bundleDiscount,
+    cartDiscount,
     extraServices,
     totalItems,
     totalToPay
@@ -72,6 +74,8 @@ const updateCart = async (req, res) => {
   const resData = {
     items,
     discount: totalDiscount,
+    bundleDiscount,
+    cartDiscount,
     extraServices,
     totalItems,
     totalToPay: finalPrice,
@@ -89,7 +93,16 @@ const updateCart = async (req, res) => {
   })
 }
 
+const calculateCartController = async (req, res) => {
+  const { items = [], lang } = req.body
+  if (!items.length) throw new BadRequest('No items provided')
+
+  const result = await calculateCart(items, lang || req.lang)
+  res.json({ data: result, success: true })
+}
+
 module.exports = {
   getCart,
-  updateCart
+  updateCart,
+  calculateCartController
 }
