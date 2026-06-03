@@ -3,6 +3,7 @@ const { TattooMachineTranslation, TattooMachine } = require('../models/tattoo-ma
 const { validateCartItems } = require('../sevices/cart-validation')
 const { Service } = require('../models')
 const { NotFound } = require('../errors')
+const { getActiveDiscounts, applyDiscountsToProducts, applyCartDiscount } = require('../sevices/discount')
 
 /** @typedef {import('../config/types').ObjectId} ObjectId */
 /** @typedef {import('../config/types').ShippingAddress} ShippingAddress */
@@ -11,9 +12,13 @@ const { NotFound } = require('../errors')
 /** @typedef {import('../config/types').DeloveryMethod} DeloveryMethod */
 /** @typedef {import('../config/types').Buyer} Buyer */
 
-const getTattooMachinesForOrder = async (cartItems, lang, type = 'order') => {
+const getTattooMachinesForOrder = async (cartItems, lang, type = 'order', preloadedDiscounts = null) => {
 
-  const { machines, productIds } = await validateCartItems(cartItems)
+  const [{ machines, productIds }, activeDiscounts] = await Promise.all([
+    validateCartItems(cartItems),
+    preloadedDiscounts ? Promise.resolve(preloadedDiscounts) : getActiveDiscounts()
+  ])
+
   const translations = await TattooMachineTranslation.find({
     tattooMachineId: { $in: productIds },
     lang: lang
@@ -24,10 +29,24 @@ const getTattooMachinesForOrder = async (cartItems, lang, type = 'order') => {
     translationMap[t.tattooMachineId.toString()] = t.title
   })
 
+  const machinesWithDiscounts = applyDiscountsToProducts(
+    machines.map(m => ({
+      id: m._id.toString(),
+      price: m.price,
+      category: m.category,
+      priceCurrent: m.priceCurrent ?? undefined
+    })),
+    activeDiscounts
+  )
+  const effectivePriceMap = {}
+  machinesWithDiscounts.forEach(m => {
+    effectivePriceMap[m.id] = m.priceCurrent ?? m.price
+  })
+
   const orderItems = cartItems.map(item => {
     const machine = machines.find(m => m._id.toString() === item.id)
     const nameAtPurchase = translationMap[item.id] || 'No translation'
-    const priceAtPurchase = machine.priceCurrent ?? machine.price
+    const priceAtPurchase = effectivePriceMap[item.id] ?? machine.price
 
     if(type === 'order') {
       return {
@@ -88,19 +107,21 @@ const singleMachineCalculation = (type = 'order') => {
 
 
 const calculateProductPrice = async (items, lang, type = 'order') => {
-  let totalPrice = 0
-  let discount = 0
+  const activeDiscounts = await getActiveDiscounts()
+  const tattooMachines = await getTattooMachinesForOrder(items, lang, type, activeDiscounts)
 
-  const tattooMachines = await getTattooMachinesForOrder(items, lang, type)
   const checkedItems = tattooMachines.reduce(singleMachineCalculation(type), { totalPrice: 0, totalDiscount: 0 })
 
-  totalPrice = fractTwoDigit(checkedItems.totalPrice)
-  discount = fractTwoDigit(checkedItems.totalDiscount)
+  const totalPrice = fractTwoDigit(checkedItems.totalPrice)
+  const discount = fractTwoDigit(checkedItems.totalDiscount)
+  const itemsSubtotal = fractTwoDigit(totalPrice - discount)
+  const cartDiscount = type === 'order' ? applyCartDiscount(itemsSubtotal, activeDiscounts) : 0
 
   return {
     tattooMachines,
     totalPrice,
     discount,
+    cartDiscount,
   }
 }
 

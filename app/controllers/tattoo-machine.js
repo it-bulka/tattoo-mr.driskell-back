@@ -6,6 +6,7 @@ const {
   getSimilar,
   getRecommendedItems
 } = require("../sevices/tattoo-machine")
+const { getBundleTiersForCombo } = require('../sevices/discount')
 
 const { BadRequest } = require("../errors")
 const { StatusCodes } = require('http-status-codes')
@@ -187,11 +188,15 @@ const getRelated = async (req, res) => {
     })
   ])
 
+  const comboIds = combo.map(p => p.id)
+  const bundleDiscountTiers = await getBundleTiersForCombo(comboIds)
+
   res.json({
-    combo: combo,
-    recommended: recommended,
+    combo,
+    bundleDiscountTiers: bundleDiscountTiers || null,
+    recommended,
     brands: brandItems,
-    similar: similar
+    similar
   });
 };
 

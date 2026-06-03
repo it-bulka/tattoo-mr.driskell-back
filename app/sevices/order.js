@@ -32,7 +32,7 @@ const createOrder = async ({
 
   const prodPrice = await calculateProductPrice(items, lang, 'order')
   totalPrice += prodPrice.totalPrice
-  discount += prodPrice.discount
+  discount += prodPrice.discount + (prodPrice.cartDiscount || 0)
 
 
   const {
