@@ -1,6 +1,6 @@
 const sendMail = require('./sendMail')
 const sendResetEmail = ({ email, token, origin }) => {
-  const resetLink = `${origin}/user/reset-password?token=${token}&email=${email}`
+  const resetLink = `${origin}/user/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
   const message = `<h1>Please reset your password by clicking on link: <a href="${resetLink}">Reset password</a></h1>`
 
   sendMail({
