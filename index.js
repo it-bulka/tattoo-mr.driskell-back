@@ -41,7 +41,12 @@ app.set('trust proxy', 1);
 app.use(rateLimiter)
 app.use(helmet())
 app.use(xssClean())
-app.use(cors())
+app.use(cors({
+  origin: process.env.CLIENT_ORIGIN,
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Device-Id', 'Accept-Language'],
+}))
 app.use(mongoSanitize())
 
 app.use(morgan('tiny'))

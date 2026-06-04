@@ -1,5 +1,8 @@
+const SUPPORTED_LANGUAGES = ['uk', 'en']
+
 const languageMiddleware = (req, res, next) => {
-  req.lang = req.headers['accept-language'] || 'en'
+  const lang = req.headers['accept-language']
+  req.lang = SUPPORTED_LANGUAGES.includes(lang) ? lang : 'en'
   next()
 }
 
