@@ -44,7 +44,7 @@ const login = async (req, res) => {
     throw new Unauthenticated('No credential')
   }
 
-  const isPasswordMatch = user.comparePassword(password)
+  const isPasswordMatch = await user.comparePassword(password)
   if(!isPasswordMatch) {
     throw new Unauthenticated('Password not valid')
   }
@@ -131,7 +131,7 @@ const refreshToken = async (req, res) => {
     throw new Unauthenticated(`Authentication invalid`)
   }
 
-  const userData = isTokenValid(refreshToken)
+  const userData = isTokenValid(refreshToken, process.env.JWT_REFRESH_SECRET)
   const tokenFromDb = await Token.findOne({ refreshToken })
   if (!userData || !tokenFromDb) {
     throw new Unauthenticated('Authentication invalid')

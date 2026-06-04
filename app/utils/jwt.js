@@ -4,8 +4,8 @@ const createJWT = ({ payload }) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_LONG })
 }
 
-const isTokenValid = (token) => {
-  return jwt.verify(token, process.env.JWT_SECRET)
+const isTokenValid = (token, secret = process.env.JWT_ACCESS_SECRET) => {
+  return jwt.verify(token, secret)
 }
 
 const REFRESH_TOKEN_COOKIES_NAME = 'refreshToken'

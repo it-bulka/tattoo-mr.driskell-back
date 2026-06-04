@@ -12,8 +12,8 @@ const refreshExpiresAt = () => {
   return new Date(expiresAt)
 }
 
-const generateTokens = ({ userId, name, email, deviceId }) => {
-  const payload = { userId, name, email, deviceId }
+const generateTokens = ({ id, name, email, role, deviceId }) => {
+  const payload = { id, name, email, role, deviceId }
 
   const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '30min' })
   const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_LONG })
