@@ -30,20 +30,30 @@ const getRandomTitle = (category, lang) => {
     return "Default Title";  // або будь-який інший значення за замовчуванням
   }
 };
-const getSpecs = (category, lang) => {
-  if (specsData[category] && specsData[category][lang]) {
-    const specs = specsData[category][lang];
-    const randomSpecs = {};
+const getSpecsForAllLangs = (category) => {
+  const categorySpecs = specsData[category]
+  if (!categorySpecs || !categorySpecs.en || !categorySpecs.uk) {
+    console.log(`No specs data found for category: ${category}`);
+    return { en: [], uk: [] }
+  }
 
-    Object.keys(specs).forEach((key) => {
-      const options = specs[key];
-      randomSpecs[key] = options[Math.floor(Math.random() * options.length)];
-    });
+  const totalSpecs = categorySpecs.en.length
+  const minCount = Math.min(3, totalSpecs)
+  const count = Math.floor(Math.random() * (totalSpecs - minCount + 1)) + minCount
+  const selectedIndices = [...Array(totalSpecs).keys()]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, count)
+    .sort((a, b) => a - b)
 
-    return randomSpecs;
-  } else {
-    console.log(`No specs data found for category: ${category}, lang: ${lang}`);
-    return {};
+  return {
+    en: selectedIndices.map(i => ({
+      name: categorySpecs.en[i].name,
+      value: categorySpecs.en[i].values[Math.floor(Math.random() * categorySpecs.en[i].values.length)]
+    })),
+    uk: selectedIndices.map(i => ({
+      name: categorySpecs.uk[i].name,
+      value: categorySpecs.uk[i].values[Math.floor(Math.random() * categorySpecs.uk[i].values.length)]
+    }))
   }
 }
 
@@ -95,6 +105,8 @@ const generate = async () => {
       ? null
       : (price - (price / 100 * Math.floor(Math.random() * 20))).toFixed(2);
 
+    const specsForAllLangs = getSpecsForAllLangs(category)
+
     const machine = {
       _id: machineId,
       images: getRandomImages(),
@@ -116,7 +128,7 @@ const generate = async () => {
           tattooMachineId: machineId,
           shortDescription: description.shortDescription,
           longDescription: description.longDescription,
-          specs: getSpecs(category, lang)
+          specs: specsForAllLangs[lang]
         }
       })
     }

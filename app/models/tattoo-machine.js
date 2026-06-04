@@ -35,8 +35,8 @@ const tattooMachineTranslationSchema = new mongoose.Schema({
     required: true
   },
   specs: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
+    type: [{ name: { type: String, required: true }, value: { type: String, required: true } }],
+    default: []
   }
 })
 
