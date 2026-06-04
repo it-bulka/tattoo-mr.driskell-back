@@ -17,7 +17,12 @@ const {
   getAllFavouriteByUser
 } = require("../controllers/favourite")
 
-router.route('/').get(getAllUsers)
+const { authenticate } = require('../middleware/authenticate')
+const { adminOnly } = require('../middleware/admin-only')
+
+router.use(authenticate)
+
+router.route('/').get(adminOnly, getAllUsers)
 router.route('/:id').get(getSingleUser)
 router.route('/:id/update').patch(updateUser)
 router.route('/:id/update-password').patch(updateUserPassword)

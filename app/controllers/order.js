@@ -1,7 +1,7 @@
 const { StatusCodes } = require("http-status-codes")
 const { createOrder } = require('../sevices')
 const { Order } = require("../models");
-const { NotFound, BadRequest } = require("../errors");
+const { NotFound, BadRequest, Unauthorized } = require("../errors");
 const { toOrderDto } = require('../utils')
 const { verifyWebhookSignature, generateCallbackResponseSignature } = require('../sevices/wayforpay')
 
@@ -83,6 +83,9 @@ const getOrderById = async (req, res) => {
 
 const getAllOrdersByUser = async (req, res) => {
   const { userId } = req.params
+  if (req.user.id !== userId && req.user.role !== 'admin') {
+    throw new Unauthorized('Access denied')
+  }
   const page = Math.max(1, Number(req.query.page) || 1)
   const limit = Math.max(1, Number(req.query.limit) || 10)
   const skip = (page - 1) * limit
