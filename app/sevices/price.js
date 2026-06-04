@@ -147,8 +147,13 @@ const getOrderServiceCost = async (totalOrderCost, selectedServices = []) => {
   let totalServiceCost = 0
   const orderServices = []
 
+  if (selectedServices.length === 0) return { totalServiceCost, orderServices }
+
+  const services = await Service.find({ _id: { $in: selectedServices } })
+  const serviceMap = new Map(services.map(s => [s._id.toString(), s]))
+
   for (const serviceId of selectedServices) {
-    const service = await Service.findById(serviceId)
+    const service = serviceMap.get(serviceId.toString())
     if (!service) throw new NotFound("Service not found")
 
     let serviceCost = service.type === "fixed" ? service.value : (totalPrice * service.value) / 100;
