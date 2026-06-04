@@ -48,6 +48,11 @@ const UserSchema = new mongoose.Schema({
   entrance: String,
   floor: String,
   doorphone: String,
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
 })
 
 UserSchema.index(
