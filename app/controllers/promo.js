@@ -1,4 +1,4 @@
-const { promoActivate, updateUserCart } = require('../sevices')
+const { promoActivate, updateUserCart, getPromoCodesList } = require('../sevices')
 
 const promoCodeActivate = async (req, res) => {
   const {
@@ -20,6 +20,12 @@ const promoCodeActivate = async (req, res) => {
   return res.status(200).json({ data, success: true })
 }
 
+const getPromoCodes = async (req, res) => {
+  const codes = await getPromoCodesList(req.lang)
+  res.status(200).json({ data: codes, success: true })
+}
+
 module.exports = {
-  promoCodeActivate
+  promoCodeActivate,
+  getPromoCodes
 }

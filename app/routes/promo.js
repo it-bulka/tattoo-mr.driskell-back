@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const { promoCodeActivate } = require('../controllers/promo')
+const { promoCodeActivate, getPromoCodes } = require('../controllers/promo')
 
-router.route('/activate')
-  .post(promoCodeActivate)
+router.route('/').get(getPromoCodes)
+router.route('/activate').post(promoCodeActivate)
 
 module.exports = router

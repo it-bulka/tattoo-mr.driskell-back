@@ -86,8 +86,59 @@ const promoActivate = async ({
   }
 }
 
+const getPromoCodesList = async (lang) => {
+  const defaultLang = 'en'
+
+  return PromoCode.aggregate([
+    { $match: { isActive: true, expiresAt: { $gt: new Date() } } },
+    {
+      $lookup: {
+        from: 'promocodetranslations',
+        let: { promoCodeId: '$_id' },
+        pipeline: [
+          { $match: { $expr: { $eq: ['$promoCodeId', '$$promoCodeId'] } } }
+        ],
+        as: 'translations'
+      }
+    },
+    {
+      $addFields: {
+        reqT: {
+          $arrayElemAt: [
+            { $filter: { input: '$translations', cond: { $eq: ['$$this.lang', lang] } } },
+            0
+          ]
+        },
+        defT: {
+          $arrayElemAt: [
+            { $filter: { input: '$translations', cond: { $eq: ['$$this.lang', defaultLang] } } },
+            0
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        id: '$_id',
+        code: 1,
+        discountType: 1,
+        discountValue: 1,
+        discountScope: 1,
+        category: 1,
+        validFrom: 1,
+        expiresAt: 1,
+        imgUrl: 1,
+        title: { $ifNull: ['$reqT.title', '$defT.title'] },
+        description: { $ifNull: ['$reqT.description', '$defT.description'] }
+      }
+    }
+  ])
+}
+
 module.exports = {
   getPromoCode,
   applyPromoCode,
-  promoActivate
+  promoActivate,
+  getPromoCodesList
 }
