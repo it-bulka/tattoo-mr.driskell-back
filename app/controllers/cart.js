@@ -1,4 +1,5 @@
 const { getUserCart, validateCartItems, applyPromoCode, getPromoCode } = require('../sevices')
+const { fractTwoDigit } = require('../utils')
 const { BadRequest } = require("../errors")
 const { updateUserCart, calculateCart } = require('../sevices/cart')
 const { cartPopulate } = require("../../mockPopulate/cart/cart-populate");
@@ -41,7 +42,8 @@ const updateCart = async (req, res) => {
   let totalDiscount = discount
   const promocodeData = {
     err: undefined,
-    promo: undefined
+    promo: undefined,
+    promoDiscount: 0
   }
 
   if (promoCode) {
@@ -61,6 +63,7 @@ const updateCart = async (req, res) => {
           type: promo.discountType,
           value: promo.discountValue
         }
+        promocodeData.promoDiscount = promoCalculation.discount
       }
     } catch (err) {
       promocodeData.err = {
@@ -85,6 +88,7 @@ const updateCart = async (req, res) => {
     resData['promoCodeError'] = promocodeData.err
   } else if(promocodeData.promo) {
     resData['promocode'] = promocodeData.promo
+    resData['promoDiscount'] = fractTwoDigit(promocodeData.promoDiscount)
   }
 
   return res.json({
