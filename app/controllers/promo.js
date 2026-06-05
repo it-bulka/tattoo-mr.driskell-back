@@ -15,7 +15,7 @@ const promoCodeActivate = async (req, res) => {
     lang: req.lang,
   })
 
-  await updateUserCart(userId, data.items)
+  if (userId) await updateUserCart(userId, data.items)
 
   return res.status(200).json({ data, success: true })
 }

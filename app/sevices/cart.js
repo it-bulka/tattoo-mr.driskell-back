@@ -126,7 +126,7 @@ const calculateCart = async (orderItems, lang) => {
   let totalItems = 0, subtotal = 0, discount = 0
 
   const items = orderItems.map(orderItem => {
-    const product = products.find(p => p.id === orderItem.id.toString())
+    const product = products.find(p => p.id.toString() === orderItem.id.toString())
     if (!product) return null
 
     const effectivePrice = product.priceCurrent ?? product.price
