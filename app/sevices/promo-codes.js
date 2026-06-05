@@ -78,7 +78,7 @@ const promoActivate = async ({
       value: promo.discountValue
     },
     items: prodPrice.tattooMachines,
-    totalItems: prodPrice.tattooMachines.length,
+    totalItems: prodPrice.tattooMachines.reduce((sum, m) => sum + (m.quantity || 1), 0),
     discount: fractTwoDigit(discount),
     promoDiscount: fractTwoDigit(promoCalculation.discount),
     extraServices: fractTwoDigit(totalServiceCost),
