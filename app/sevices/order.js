@@ -55,7 +55,7 @@ const createOrder = async ({
     items: prodPrice.tattooMachines,
     totalOriginalProductsPrice: fractTwoDigit(totalPrice),
     totalPrice: fractTwoDigit(finalPrice),
-    totalServiceCost,
+    totalServicePrice: totalServiceCost,
     totalDiscounts: fractTwoDigit(discount),
     promoCode: promoCodeId,
     services: orderServices,
