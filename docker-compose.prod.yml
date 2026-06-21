@@ -1,0 +1,23 @@
+services:
+  backend-tattoo:
+    container_name: backend-tattoo
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    networks:
+      - shared-proxy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  shared-proxy:
+    external: true
