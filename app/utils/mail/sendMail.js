@@ -1,14 +1,13 @@
-const nodeMailerConfig = require(`./nodeMailerConfig`)
-const nodeMailer = require("nodemailer");
+const { Resend } = require('resend')
 
-const sendMail = async ({ to, subject, html, text }) => {
-  const transporter = nodeMailer.createTransport(nodeMailerConfig)
-  await transporter.sendMail({
-    from: 'i.it.bulka@gmail.com',
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+const sendMail = async ({ to, subject, html }) => {
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM,
     to,
     subject,
     html,
-    text
   })
 }
 
