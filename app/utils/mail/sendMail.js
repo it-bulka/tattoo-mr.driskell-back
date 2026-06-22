@@ -1,6 +1,6 @@
-const { Resend } = require('resend')
+const { Resend } = require("resend");
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendMail = async ({ to, subject, html }) => {
   await resend.emails.send({
@@ -8,7 +8,7 @@ const sendMail = async ({ to, subject, html }) => {
     to,
     subject,
     html,
-  })
-}
+  });
+};
 
-module.exports = sendMail
+module.exports = sendMail;
