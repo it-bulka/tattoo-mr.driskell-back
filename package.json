@@ -7,7 +7,9 @@
     "lint": "eslint ./app",
     "lint:fix": "eslint ./app --fix",
     "watch": "nodemon",
-    "start": "node index.js"
+    "start": "node index.js",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
+    "docker:dev:down": "docker compose -f docker-compose.dev.yml down"
   },
   "engines": {
     "node": ">=18.0.0"
