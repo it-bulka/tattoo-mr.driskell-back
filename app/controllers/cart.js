@@ -2,7 +2,6 @@ const { getUserCart, validateCartItems, applyPromoCode, getPromoCode } = require
 const { fractTwoDigit } = require('../utils')
 const { BadRequest } = require("../errors")
 const { updateUserCart, calculateCart } = require('../sevices/cart')
-const { cartPopulate } = require("../../mockPopulate/cart/cart-populate");
 
 const getCart = async (req, res) => {
   const { userId } = req.query
