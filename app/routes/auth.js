@@ -16,6 +16,6 @@ router.post('/verify-email', verifyEmail)
 router.post('/forgot-password', forgotPassword)
 router.post('/reset-password', resetPassword)
 router.post('/refresh-token', refreshToken)
-router.get('/logout', logout)
+router.post('/logout', logout)
 
 module.exports = router

@@ -44,6 +44,10 @@ const login = async (req, res) => {
     throw new Unauthenticated('No credential')
   }
 
+  if (!user.isVerified) {
+    throw new Unauthenticated('Please verify your email before logging in')
+  }
+
   const isPasswordMatch = await user.comparePassword(password)
   if(!isPasswordMatch) {
     throw new Unauthenticated('Password not valid')
