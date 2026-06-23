@@ -9,7 +9,7 @@ const { sendEmailVerification, sendResetEmail } = require("../utils/mail");
 const uuid = require("uuid");
 const { issueTokensForUser } = require("../sevices");
 const { getDeviceIdHeader, deleteToken } = require("../sevices/token");
-const { toUserDto } = require("../utils");
+const { toUserDto, logger } = require("../utils");
 const { clearCookiesToken, isTokenValid } = require("../utils/jwt");
 const { Token } = require("../models");
 
@@ -24,11 +24,15 @@ const register = async (req, res) => {
     verificationToken,
   });
 
+  logger.info("auth", "User registered, sending verification email", { email });
+
   await sendEmailVerification({
     email,
     verificationToken,
     origin: process.env.CLIENT_ORIGIN,
   });
+
+  logger.info("auth", "Verification email sent", { email });
 
   return res.status(StatusCodes.OK).send();
 };
@@ -91,7 +95,7 @@ const forgotPassword = async (req, res) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw Unauthenticated(`User with email ${email} not found`);
+    throw new Unauthenticated(`User with email ${email} not found`);
   }
 
   const passwordToken = uuid.v4();
@@ -101,11 +105,16 @@ const forgotPassword = async (req, res) => {
   user.passwordTokenExpirationDate = new Date(Date.now() + expires);
   await user.save();
 
+  logger.info("auth", "Sending password reset email", { email });
+
   await sendResetEmail({
     email,
     token: passwordToken,
     origin: process.env.CLIENT_ORIGIN,
   });
+
+  logger.info("auth", "Password reset email sent", { email });
+
   return res.status(StatusCodes.OK).send();
 };
 
@@ -119,7 +128,7 @@ const resetPassword = async (req, res) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw Unauthenticated(`Credentials failed`);
+    throw new Unauthenticated(`Credentials failed`);
   }
 
   const isTokenVerified = user.passwordToken === passwordToken;
