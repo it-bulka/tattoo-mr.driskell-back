@@ -13,6 +13,7 @@ const xssClean = require('xss-clean')
 const cors = require('cors')
 const mongoSanitize = require('express-mongo-sanitize')
 
+const logger = require('./app/utils/logger')
 const connectDB = require('./app/db/connectDB')
 // MIDDLEWARE
 const languageMiddleware = require('./app/middleware/language-middleware')
@@ -49,9 +50,17 @@ app.use(cors({
 }))
 app.use(mongoSanitize())
 
-app.use(morgan('tiny'))
 app.use(express.json())
 app.use(cookieParser(process.env.COOKIE_SECRET))
+
+morgan.token('body', (req) => {
+  if (!req.body || Object.keys(req.body).length === 0) return ''
+  const sanitized = logger.sanitize({ ...req.body })
+  const str = JSON.stringify(sanitized)
+  return str.length > 500 ? str.slice(0, 500) + '...' : str
+})
+
+app.use(morgan(':date[iso] :method :url :status :res[content-length] - :response-time ms :body'))
 
 app.use(languageMiddleware)
 

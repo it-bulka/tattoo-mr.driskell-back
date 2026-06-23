@@ -1,14 +1,18 @@
 const { StatusCodes } = require('http-status-codes')
 const { CustomError } = require('../errors')
+const logger = require('../utils/logger')
 
 const errorHandler = (err, req, res, next) => {
+  const ctx = { method: req.method, url: req.originalUrl, ip: req.ip }
+
   if(err instanceof CustomError) {
+    logger.warn('errorHandler', `${err.statusCode} ${err.message}`, ctx)
     const body = { message: err.message, success: 'failed' }
     if (err.field) body.field = err.field
     return res.status(err.statusCode).json(body)
   }
 
-  console.error('[500 Internal Error]', err)
+  logger.error('errorHandler', `500 ${err.message}`, { ...ctx, stack: err.stack })
 
   const body = { message: 'Internal Server Error', success: 'failed' }
   if (process.env.NODE_ENV !== 'production') {
