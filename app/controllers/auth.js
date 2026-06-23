@@ -172,6 +172,14 @@ const refreshToken = async (req, res) => {
     .json({ data: toUserDto(user), accessToken, success: true });
 };
 
+const me = async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw new Unauthenticated("User not found");
+  }
+  return res.status(StatusCodes.OK).json({ data: toUserDto(user), success: true });
+};
+
 module.exports = {
   register,
   login,
@@ -180,4 +188,5 @@ module.exports = {
   resetPassword,
   logout,
   refreshToken,
+  me,
 };
