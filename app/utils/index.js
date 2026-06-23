@@ -5,6 +5,7 @@ const { escapeRegex } = require('./escapeRegex')
 const { createTokenPayload } = require('./createTokenPayload')
 const { toUserDto } = require('./toUserDto')
 const { toOrderDto } = require('./toOrderDto')
+const logger = require('./logger')
 
 module.exports = {
   langs,
@@ -15,4 +16,5 @@ module.exports = {
   createTokenPayload,
   toUserDto,
   toOrderDto,
+  logger,
 }
