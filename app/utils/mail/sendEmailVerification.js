@@ -2,14 +2,40 @@ const sendMail = require("./sendMail");
 
 const sendEmailVerification = async ({ email, verificationToken, origin }) => {
   const verifyLink = `${origin}/user/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(email)}`;
-  const html = `
-<h1>Please confirm your email by clicking the link: <a href="${verifyLink}" target="_blank">Confirm email</a></h1>
-<p>The link will become inactive after 24 hours.</p>
-`;
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:40px 0;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
+        <tr><td style="background-color:#1a1a1a;padding:30px;text-align:center;">
+          <h1 style="color:#ffffff;margin:0;font-size:24px;">Mr.Driskell</h1>
+        </td></tr>
+        <tr><td style="padding:40px 30px;">
+          <p style="font-size:16px;color:#333333;margin:0 0 20px;">Hello,</p>
+          <p style="font-size:16px;color:#333333;margin:0 0 20px;">Thank you for registering at Mr.Driskell store. Please confirm your email address by clicking the button below:</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:30px auto;">
+            <tr><td style="background-color:#1a1a1a;border-radius:6px;padding:14px 32px;">
+              <a href="${verifyLink}" target="_blank" style="color:#ffffff;text-decoration:none;font-size:16px;font-weight:bold;display:inline-block;">Confirm email</a>
+            </td></tr>
+          </table>
+          <p style="font-size:14px;color:#666666;margin:20px 0 0;">If the button doesn't work, copy and paste this link into your browser:</p>
+          <p style="font-size:13px;color:#999999;word-break:break-all;margin:8px 0 0;">${verifyLink}</p>
+          <p style="font-size:14px;color:#666666;margin:20px 0 0;">This link will expire in 24 hours.</p>
+        </td></tr>
+        <tr><td style="background-color:#f9f9f9;padding:20px 30px;text-align:center;">
+          <p style="font-size:12px;color:#999999;margin:0;">This email was sent by Mr.Driskell store. If you did not create an account, you can safely ignore this email.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
   await sendMail({
     to: email,
-    subject: "Email verification for Mr.Driskell store",
+    subject: "Confirm your email — Mr.Driskell",
     html,
   });
 };
