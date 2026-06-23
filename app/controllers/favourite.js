@@ -70,26 +70,21 @@ const batchFavourite = async (req, res) => {
     deleteManyFavouriteTattooMachine(idsToRemove, userId)
   ])
 
-  const fulfilled = result.filter(r => r.status === 'fulfilled')
   const rejected = result.filter(r => r.status === 'rejected')
 
-  if (fulfilled.length === result.length) {
-    return res.send({ success: true, message: 'All operations fulfilled' })
-  } else if (rejected.length === result.length) {
-    const combinedError = rejected.map(r => r.reason).join('; ')
-    return res.status(500).send({
+  if (rejected.length) {
+    const errors = rejected.map(r => r.reason?.message || r.reason).join('; ')
+    return res.status(rejected.length === result.length ? 500 : 207).json({
+      data: { added: idsToAdd || [], removed: idsToRemove || [] },
       success: false,
-      message: 'All operations failed',
-      error: combinedError
-    });
-  } else {
-    const errorPart = rejected.map(r => r.reason).join('; ')
-    return res.status(207).send({
-      success: false,
-      message: 'Some operation failed',
-      errors: errorPart
-    });
+      error: { message: errors },
+    })
   }
+
+  return res.json({
+    data: { added: idsToAdd || [], removed: idsToRemove || [] },
+    success: true,
+  })
 }
 
 module.exports = {

@@ -69,16 +69,18 @@ const setManyFavouriteTattooMachine = async (machineIds, userId) => {
 }
 
 const deleteFavouriteTattooMachine = async (machineId, userId) => {
-  FavouriteMachine.deleteOne({ tattooMachineId: machineId, userId })
+  await FavouriteMachine.deleteOne({ tattooMachineId: machineId, userId })
 }
 
 const deleteManyFavouriteTattooMachine = async (machineIds, userId) => {
   if(!machineIds.length) return { success: true }
 
-  FavouriteMachine.deleteMany({
+  await FavouriteMachine.deleteMany({
     tattooMachineId: { $in: machineIds },
     userId
   })
+
+  return { success: true }
 }
 
 const setIfLikedToResult = async (foundProducts, userId = '67e423a7338425de0b07ed80') => {
