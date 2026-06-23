@@ -2,7 +2,7 @@ const User = require(`../models/user.js`)
 const { StatusCodes } = require('http-status-codes')
 const { NotFound, BadRequest, Unauthorized } = require("../errors")
 const { toUserDto } = require('../utils')
-const { updatePassword, updateUser: updateUserService } = require('../sevices/user')
+const { updatePassword, updateUser: updateUserService, deleteUser: deleteUserService } = require('../sevices/user')
 
 const checkOwnUser = (req, paramKey = 'id') => {
   if (req.user.id !== req.params[paramKey] && req.user.role !== 'admin') {
@@ -51,10 +51,17 @@ const updateUserPassword = async (req, res) => {
 }
 
 
+const deleteUser = async (req, res) => {
+  checkOwnUser(req)
+  await deleteUserService(req.params.id)
+  res.status(StatusCodes.OK).json({ message: 'Account deleted', success: 'success' })
+}
+
 module.exports = {
   getSingleUser,
   getAllUsers,
   getCurrentUser,
   updateUser,
-  updateUserPassword
+  updateUserPassword,
+  deleteUser,
 }

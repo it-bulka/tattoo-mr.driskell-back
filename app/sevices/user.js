@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const { Order, FavouriteMachine, Cart, Token } = require('../models')
 const { BadRequest, NotFound } = require('../errors')
 
 const updatePassword = async (userId, oldPassword, newPassword) => {
@@ -36,4 +37,17 @@ const updateUser = async (userId, fields) => {
   }
 }
 
-module.exports = { updatePassword, updateUser }
+const deleteUser = async (userId) => {
+  const user = await User.findById(userId)
+  if (!user) throw new NotFound('User not found')
+
+  await Promise.all([
+    Order.deleteMany({ userId }),
+    FavouriteMachine.deleteMany({ userId }),
+    Cart.deleteMany({ userId }),
+    Token.deleteMany({ user: userId }),
+    User.findByIdAndDelete(userId),
+  ])
+}
+
+module.exports = { updatePassword, updateUser, deleteUser }

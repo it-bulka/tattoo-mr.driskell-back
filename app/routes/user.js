@@ -5,7 +5,8 @@ const {
   getAllUsers,
   getSingleUser,
   updateUser,
-  updateUserPassword
+  updateUserPassword,
+  deleteUser,
 } = require('../controllers/user')
 
 const {
@@ -23,7 +24,7 @@ const { adminOnly } = require('../middleware/admin-only')
 router.use(authenticate)
 
 router.route('/').get(adminOnly, getAllUsers)
-router.route('/:id').get(getSingleUser)
+router.route('/:id').get(getSingleUser).delete(deleteUser)
 router.route('/:id/update').patch(updateUser)
 router.route('/:id/update-password').patch(updateUserPassword)
 router.route('/:userId/orders')
